@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+
+
+spring:
+  kafka:
+    bootstrap-servers: 192.168.101.101:9092
+    consumer:
+      group-id: big-data-group
+      auto-offset-reset: earliest
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+logging:
+  level:
+    root: error
+    org.springframework.web: info
+
+flink:
+  job-manager:
+    host: 192.168.101.101
+    port: 6123
+
+
