@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @日期 2024/3/23 11:23
  */
-@Component
+//@Component
 public class FlinkJobComponent {
     @Value("${flink.job-manager.host}")
     String host;

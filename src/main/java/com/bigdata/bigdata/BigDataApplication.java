@@ -1,5 +1,6 @@
 package com.bigdata.bigdata;
 
+import com.bigdata.bigdata.flink.FlinkKafka;
 import com.bigdata.bigdata.jobs.FlinkJobComponent;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,8 +11,8 @@ public class BigDataApplication {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context = SpringApplication.run(BigDataApplication.class, args);
-        FlinkJobComponent flinkJobComponent = context.getBean(FlinkJobComponent.class);
-        flinkJobComponent.runFlinkJob();
+        FlinkKafka flinkJobComponent = context.getBean(FlinkKafka.class);
+        flinkJobComponent.runJob();
     }
 
 }

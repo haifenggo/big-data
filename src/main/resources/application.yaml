@@ -17,6 +17,7 @@ logging:
   level:
     root: error
     org.springframework.web: info
+    org.apache.kafka: ERROR
 
 flink:
   job-manager:
