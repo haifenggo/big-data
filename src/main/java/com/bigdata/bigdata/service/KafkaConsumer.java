@@ -16,6 +16,11 @@ public class KafkaConsumer {
         System.out.println("Received message: " + message);
     }
 
+    @KafkaListener(topics = "big-data-topic-test", groupId = "output-group")
+    public void consume_video(String message) {
+        System.out.println("Received message: " + message);
+    }
+
     /**
      * topics是Kafka中的消息分类。生产者将消息发送到特定的主题，消费者则从特定的主题中读取消息。
      * 一个主题可以被多个消费者订阅。
