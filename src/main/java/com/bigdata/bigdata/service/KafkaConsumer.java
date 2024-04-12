@@ -16,9 +16,9 @@ public class KafkaConsumer {
         System.out.println("Received message: " + message);
     }
 
-    @KafkaListener(topics = "big-data-topic-test", groupId = "output-group")
+    @KafkaListener(topics = "big-data-topic-test-1", groupId = "output-group")
     public void consume_video(String message) {
-        System.out.println("Received message: " + message);
+        System.out.println("Received message-1: " + message);
     }
 
     /**

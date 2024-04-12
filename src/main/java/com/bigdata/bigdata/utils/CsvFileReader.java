@@ -37,16 +37,21 @@ public class CsvFileReader {
 
 
             List<VideoData> videoDataList = csvToBean.parse();
-
-            Random random = new Random();
-            for (VideoData videoData : videoDataList) {
-//                System.out.println(videoData);
-                String videoDataJson = JSON.toJSONString(videoData);
-                kafkaTemplate.send("big-data-topic-test", videoDataJson);
-                // 随机暂停时间，范围是0到3000毫秒
-                int sleepTime = random.nextInt(3000);
-                Thread.sleep(sleepTime);
-            }
+            new Thread(() -> {
+                Random random = new Random();
+                for (VideoData videoData : videoDataList) {
+                    String videoDataJson = JSON.toJSONString(videoData);
+                    kafkaTemplate.send("big-data-topic-test", videoDataJson);
+//                System.out.println("video send: " + videoDataJson);
+                    // 随机暂停时间，范围是0到3000毫秒
+                    int sleepTime = random.nextInt(3000);
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -14,6 +14,6 @@ public class KafkaController {
 
     @PostMapping("/send")
     public void sendMessage(@RequestBody String message) {
-        kafkaTemplate.send("big-data-topic", message);
+        kafkaTemplate.send("big-data-topic-test", message);
     }
 }

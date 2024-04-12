@@ -1,10 +1,15 @@
 package com.bigdata.bigdata.flink;
 
+import com.alibaba.fastjson.JSON;
+import com.bigdata.bigdata.entity.VideoData;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.runtime.ValueSerializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
@@ -36,7 +41,7 @@ public class FlinkKafka {
         properties.setProperty("group.id", "big-data-group");
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         FlinkKafkaConsumer<String> kafkaConsumer = new FlinkKafkaConsumer<>(
-                "big-data-topic", // topic
+                "big-data-topic-test", // topic
                 new SimpleStringSchema(), // schema
                 properties // consumer config
         );
@@ -47,24 +52,39 @@ public class FlinkKafka {
         properties.setProperty("bootstrap.servers", "192.168.101.101:9092");
 
         kafkaStream
-                .flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
-                    @Override
-                    public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws Exception {
-                        String[] words = value.toLowerCase().split("\\W+");
-                        for (String word : words) {
-                            if (word.length() > 0) {
-                                out.collect(new Tuple2<>(word, 1));
-                            }
-                        }
+                .map(value -> JSON.parseObject(value, VideoData.class)) // 解析JSON字符串为VideoData对象
+                .flatMap((FlatMapFunction<VideoData, Tuple2<String, Integer>>) (videoData, out) -> {
+                    String publishLocation = videoData.getPublishLocation();
+                    if (publishLocation != null && !publishLocation.isEmpty()) {
+                        out.collect(new Tuple2<>(publishLocation, 1));
                     }
-                })
-                .keyBy(0)
-                .sum(1)
-                .map(tuple -> tuple.f0 + "," + tuple.f1) // 将Tuple转换为字符串
+                }) // 根据发布地点进行统计
+                .returns(Types.TUPLE(Types.STRING, Types.INT)) // 显式指定返回类型
+                .keyBy(tuple -> tuple.f0)
+                .sum(1) // 对每个发布地点的计数进行求和
+                .map(tuple -> "{\"publishLocation\":\"" + tuple.f0 + "\",\"count\":" + tuple.f1 + "}") // 将Tuple转换为JSON字符串
                 .addSink(new FlinkKafkaProducer<>(
                         "output-topic",
-                        new SimpleStringSchema(), properties));
+                        new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
 
+        kafkaStream
+                .map(value -> JSON.parseObject(value, VideoData.class)) // 解析JSON字符串为VideoData对象
+                .flatMap((FlatMapFunction<VideoData, Tuple2<String, Integer>>) (videoData, out) -> {
+                    String publishLocation = videoData.getPublishLocation();
+                    if (publishLocation != null && !publishLocation.isEmpty()) {
+                        out.collect(new Tuple2<>(publishLocation, 1));
+                    }
+                }) // 根据发布地点进行统计
+                .returns(Types.TUPLE(Types.STRING, Types.INT)) // 显式指定返回类型
+                .keyBy(tuple -> tuple.f0)
+                .sum(1) // 对每个发布地点的计数进行求和
+                .map(tuple -> "{\"publishLocation\":\"" + tuple.f0 + "\",\"count\":" + tuple.f1 + "}") // 将Tuple转换为JSON字符串
+                .addSink(new FlinkKafkaProducer<>(
+                        "big-data-topic-test-1",
+                        new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
+
+
+        System.out.println("flink start");
         env.execute("Flink");
     }
 
