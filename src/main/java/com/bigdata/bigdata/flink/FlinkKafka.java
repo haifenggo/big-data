@@ -4,16 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.bigdata.bigdata.entity.VideoData;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.runtime.ValueSerializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
@@ -24,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 2024/4/9 21:52
@@ -55,17 +59,23 @@ public class FlinkKafka {
 
         kafkaStream
                 .map(value -> JSON.parseObject(value, VideoData.class)) // 解析JSON字符串为VideoData对象
-                .flatMap((FlatMapFunction<VideoData, Tuple2<String, Integer>>) (videoData, out) -> {
-                    String publishLocation = videoData.getPublishLocation();
-                    if (publishLocation != null && !publishLocation.isEmpty()) {
-                        out.collect(new Tuple2<>(publishLocation, 1));
-                    }
-                }) // 根据发布地点进行统计
-                .returns(Types.TUPLE(Types.STRING, Types.INT)) // 显式指定返回类型
-                .keyBy(tuple -> tuple.f0)
+                .filter(videoData -> videoData.getPublishLocation() != null)
+                .keyBy(VideoData::getPublishLocation)
                 .window(SlidingProcessingTimeWindows.of(Time.seconds(20), Time.seconds(5)))
-                .sum(1) // 对每个发布地点的计数进行求和
-                .map(tuple -> "{\"publishLocation\":\"" + tuple.f0 + "\",\"count\":" + tuple.f1 + "}") // 将Tuple转换为JSON字符串
+                .process(new ProcessWindowFunction<VideoData, String, String, TimeWindow>() {
+                    @Override
+                    public void process(String key, Context context, Iterable<VideoData> elements, Collector<String> out) {
+                        Set<String> distinctBVs = new HashSet<>();
+                        for (VideoData videoData : elements) {
+                            distinctBVs.add(videoData.getBV());
+                        }
+                        Map<String, String > mp = new HashMap();
+                        mp.put("publishLocation", key);
+                        mp.put("count", String.valueOf(distinctBVs.size()));
+                        String string = JSON.toJSONString(mp);
+                        out.collect(string);
+                    }
+                })
                 .addSink(new FlinkKafkaProducer<>(
                         "output-topic",
                         new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
