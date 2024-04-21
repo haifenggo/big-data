@@ -44,7 +44,7 @@ public class CsvFileReader {
                 for (VideoData videoData : videoDataList) {
                     String videoDataJson = JSON.toJSONString(videoData);
                     kafkaTemplate.send("big-data-topic-test", videoDataJson);
-//                    mongoTemplate.insert(videoData);
+                    mongoTemplate.insert(videoData);
 //                    System.out.println("video send: " + videoDataJson);
                     // 随机暂停时间，范围是0到3000毫秒
                     int sleepTime = random.nextInt(3000);
