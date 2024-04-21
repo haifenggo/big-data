@@ -12,6 +12,8 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
@@ -61,26 +63,11 @@ public class FlinkKafka {
                 }) // 根据发布地点进行统计
                 .returns(Types.TUPLE(Types.STRING, Types.INT)) // 显式指定返回类型
                 .keyBy(tuple -> tuple.f0)
+                .window(SlidingProcessingTimeWindows.of(Time.seconds(20), Time.seconds(5)))
                 .sum(1) // 对每个发布地点的计数进行求和
                 .map(tuple -> "{\"publishLocation\":\"" + tuple.f0 + "\",\"count\":" + tuple.f1 + "}") // 将Tuple转换为JSON字符串
                 .addSink(new FlinkKafkaProducer<>(
                         "output-topic",
-                        new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
-
-        kafkaStream
-                .map(value -> JSON.parseObject(value, VideoData.class)) // 解析JSON字符串为VideoData对象
-                .flatMap((FlatMapFunction<VideoData, Tuple2<String, Integer>>) (videoData, out) -> {
-                    String publishLocation = videoData.getPublishLocation();
-                    if (publishLocation != null && !publishLocation.isEmpty()) {
-                        out.collect(new Tuple2<>(publishLocation, 1));
-                    }
-                }) // 根据发布地点进行统计
-                .returns(Types.TUPLE(Types.STRING, Types.INT)) // 显式指定返回类型
-                .keyBy(tuple -> tuple.f0)
-                .sum(1) // 对每个发布地点的计数进行求和
-                .map(tuple -> "{\"publishLocation\":\"" + tuple.f0 + "\",\"count\":" + tuple.f1 + "}") // 将Tuple转换为JSON字符串
-                .addSink(new FlinkKafkaProducer<>(
-                        "big-data-topic-test-1",
                         new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
 
 
