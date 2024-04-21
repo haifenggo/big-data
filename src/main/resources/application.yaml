@@ -15,6 +15,11 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:big-data-root@192.168.101.101:27017/big-data
+  redis:
+    host: 192.168.101.101
+    port: 6379
+    password: redisroot
+    database: 1
 logging:
   level:
     root: error
