@@ -7,6 +7,7 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +23,11 @@ import java.util.Random;
 public class CsvFileReader {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
-
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public void read() {
-        try (CSVReader fileReader = new CSVReader(new InputStreamReader(new FileInputStream("C:\\Users\\张海锋\\Desktop\\作业\\大数据项目/all_data.csv"), "gbk"))) {
+        try (CSVReader fileReader = new CSVReader(new InputStreamReader(new FileInputStream("src/main/resources/data/all_data.csv"), "gbk"))) {
             HeaderColumnNameMappingStrategy<VideoData> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(VideoData.class);
 
@@ -42,6 +44,7 @@ public class CsvFileReader {
                 for (VideoData videoData : videoDataList) {
                     String videoDataJson = JSON.toJSONString(videoData);
                     kafkaTemplate.send("big-data-topic-test", videoDataJson);
+                    mongoTemplate.insert(videoData);
 //                    System.out.println("video send: " + videoDataJson);
                     // 随机暂停时间，范围是0到3000毫秒
                     int sleepTime = random.nextInt(3000);
