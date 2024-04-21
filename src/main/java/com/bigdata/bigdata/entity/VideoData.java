@@ -3,14 +3,17 @@ package com.bigdata.bigdata.entity;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
 /**
- *  2024/4/10
+ * 2024/4/10
  */
 @Data
+@Document("VideoData")
 public class VideoData {
+
     @CsvBindByName(column = "视频名称")
     private String videoName; // 视频名称
 
@@ -44,6 +47,9 @@ public class VideoData {
     @CsvBindByName(column = "视频时长")
     private long videoDuration; // 视频时长
 
-    @CsvBindByName(column = "推荐理由")
-    private String reason; // 推荐理由
+//    @CsvBindByName(column = "推荐理由")
+//    private String reason; // 推荐理由
+
+    @CsvBindByName(column = "BV号")
+    private String BV; // BV号
 }
