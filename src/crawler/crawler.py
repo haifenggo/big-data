@@ -27,7 +27,7 @@ cookie = {'domain': '/',
 
 #爬虫部分
 #1.数据是动态加载的，所以需要寻找数据地址
-def Get_data(all_data):
+def Get_data(all_data, all_comment):
     global proxy,cookie
     header={
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -41,7 +41,7 @@ def Get_data(all_data):
         while True:
             res=requests.get(url=url,headers=header,proxies=proxy,cookies=cookie,params=param)
             #print(res.text)
-            flag = Parse(res.text, all_data)
+            flag = Parse(res.text, all_data, all_comment)
             res.close()
             if flag is True:
                 break
@@ -49,34 +49,38 @@ def Get_data(all_data):
 #2.对爬取到的数据进行解析，获取每一条视频数据的标题，Up主，播放量，评论数
 
 #对所有视频的数据都解析，每一条数据以元组的形式保存在列表中
-def Parse(text, all_data):
+def Parse(text, all_data, all_comment):
     dict=json.loads(text)#把数据转化为字典方便数据提取
    # print(dict['data']['list'])
     cid_list = []
-    print("working in comprehensive")
+    # print("working in comprehensive")
     if dict['code'] != 0:
         time.sleep(1)
         return False
     for i in dict['data']['list']:
         # print(i)
-        temp=(i['title'],i['owner']['name'],i['stat']['view'],i['stat']['danmaku'],
-            i['stat']['favorite'],i['stat']['like'],i['stat']['coin'],i['stat']['share'],i.get('pub_location', ''),
-            i['pubdate'], i['duration'], i['rcmd_reason']['content'],i['bvid'])
+        temp={"title": i['title'], "ownerName": i['owner']['name'], "views": i['stat']['view'], "comments": i['stat']['danmaku'],
+            "favorites": i['stat']['favorite'], "likes": i['stat']['like'], "coins": i['stat']['coin'],
+            "shares": i['stat']['share'], "pubLocation": i.get('pub_location', ''),
+            "uploadTime": i['pubdate'], "duation": i['duration'], "rcmdReason": i['rcmd_reason']['content'],
+            "bvid": i['bvid']}
         cid_list.append(i['cid'])
         all_data.append(temp)
-    comment_list, comment_video_time_lsit, comment_real_time_list = iterCrawlComment(cid_list)
-    writeComment2file('comment_comprehensive.csv', comment_list, comment_video_time_lsit, comment_real_time_list)
+    comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
+    for i in range(len(comment_list)):
+        all_comment.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
+                                "commentRealTime": comment_real_time_list[i]})
+    # writeComment2file('comment_comprehensive.csv', comment_list, comment_video_time_lsit, comment_real_time_list)
     return True
 
 #3.对数据进行保存
-def Save_data(all_data):
-    with open(r'comprehensive.csv',mode='w',encoding='utf-8') as fp:
-        writer=csv.writer(fp)#创建一个csv的写对象
-        writer.writerow(['视频名称','up主','播放量','评论数','收藏数','点赞数','投币数','分享数','发布地点','发布时间', '视频时长','推荐理由','BV号'])#写一行数据作为数据头部
-        for i in all_data:
-            writer.writerow(i)#把all_data的数据写进去
+def Save_data(all_data, all_comment, mongoDB):
+    collection = mongoDB["comprehensive"]
+    collection.insert_many(all_data)
+    collection = mongoDB["comprehensiveComments"]
+    collection.insert_many(all_comment)
 
-def getOthers():
+def getOthers(mongoDB, all_comment):
     header={
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -108,20 +112,33 @@ def getOthers():
                 time.sleep(1)
         data = []
         cid_list = []
+        rank = 0
         for i in dict['data']['list']:
             # print(i)
-            temp=(i['title'],i['owner']['name'],i['stat']['view'],i['stat']['danmaku'],
-                i['stat']['favorite'],i['stat']['like'],i['stat']['coin'],i['stat']['share'],i.get('pub_location', ''),
-                i['pubdate'], i['duration'],i['bvid'])
+            temp={"title": i['title'], "ownerName": i['owner']['name'], "views": i['stat']['view'], "comments": i['stat']['danmaku'],
+                "favorites": i['stat']['favorite'], "likes": i['stat']['like'], "coins": i['stat']['coin'],
+                "shares": i['stat']['share'], "pubLocation": i.get('pub_location', ''),
+                "uploadTime": i['pubdate'], "duation": i['duration'], "bvid": i['bvid'], "rank": rank}
+            rank += 1
             cid_list.append(i['cid'])
             data.append(temp)
-        comment_list, comment_video_time_lsit, comment_real_time_list = iterCrawlComment(cid_list)
-        writeComment2file('comment_' + filenames[j], comment_list, comment_video_time_lsit, comment_real_time_list)
-        with open(filenames[j],mode='w',encoding='utf-8') as fp:
-            writer=csv.writer(fp)#创建一个csv的写对象
-            writer.writerow(['视频名称','up主','播放量','评论数','收藏数','点赞数','投币数','分享数','发布地点','发布时间', '视频时长','BV号'])#写一行数据作为数据头部
-            for i in data:
-                writer.writerow(i)#把all_data的数据写进去
+        # 插入mongo
+        collection = mongoDB[filenames[j]]
+        collection.insert_many(data)
+        comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
+        comments_dicts = []
+        for i in range(len(comment_list)):
+            comments_dicts.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
+                                    "commentRealTime": comment_real_time_list[i]})
+        collection = mongoDB[filenames[j] + "Comments"]
+        collection.insert_many(comments_dicts)
+        all_comment.append(comments_dicts)
+        # writeComment2file('comment_' + filenames[j], comment_list, comment_video_time_lsit, comment_real_time_list)
+        # with open(filenames[j],mode='w',encoding='utf-8') as fp:
+        #     writer=csv.writer(fp)#创建一个csv的写对象
+        #     writer.writerow(['视频名称','up主','播放量','评论数','收藏数','点赞数','投币数','分享数','发布地点','发布时间', '视频时长','BV号'])#写一行数据作为数据头部
+        #     for i in data:
+        #         writer.writerow(i)#把all_data的数据写进去
         res.close()
         time.sleep(1)
 
@@ -149,6 +166,7 @@ def crawlComment(cid, proxy):
     session = requests.session()
     session.keep_alive = False
     content_list = []
+    video_time_list, real_time_list = [], []
     try:
         resp = session.get(url, headers = headers, timeout = (2,2))
         # 调用.encoding属性获取requests模块的编码方式
@@ -173,14 +191,14 @@ def writeComment2file(comment_file_path, content_list, comment_video_time_list, 
         # for item in content_list:
             # fin.write(item + '\n')
 
-if __name__ == '__main__':
-    all_data=[]
-    while True:
-        Get_data(all_data=all_data)
-        #print(all_data)
-        Save_data(all_data=all_data)
-        time.sleep(2)
-        getOthers()
+# if __name__ == '__main__':
+#     all_data=[]
+#     while True:
+#         Get_data(all_data=all_data)
+#         Save_data(all_data=all_data)
+#         time.sleep(2)
+#         getOthers()
+#         time.sleep(10)
 
 
 
