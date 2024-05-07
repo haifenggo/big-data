@@ -1,7 +1,6 @@
 package com.bigdata.bigdata;
 
 import com.bigdata.bigdata.flink.FlinkKafka;
-import com.bigdata.bigdata.jobs.FlinkJobComponent;
 import com.bigdata.bigdata.utils.CsvFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +21,7 @@ public class BigDataApplication implements CommandLineRunner {
     CsvFileReader csvFileReader;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         csvFileReader.read();
     }
 }

@@ -1,19 +1,33 @@
 package com.bigdata.bigdata.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 // 2024/3/19
 @Service
 public class KafkaConsumer {
-//    @KafkaListener(topics = "big-data-topic", groupId = "big-data-group")
-//    public void consume(String message) {
-//        System.out.println("Received message: " + message);
-//    }
+    @Autowired
+    RedisTemplate redisTemplate;
 
-    @KafkaListener(topics = "output-topic", groupId = "output-group")
+    @KafkaListener(topics = "output-topic-LocationCount", groupId = "output-group-LocationCount")
     public void consume(String message) {
-        System.out.println("Received message: " + message);
+        JSONObject locationCount = JSON.parseObject(message);
+        String location = (String)locationCount.get("publishLocation");
+        String count = (String)locationCount.get("count");
+        String timestamp = (String)locationCount.get("timestamp");
+        Map<String, String > mp = new HashMap();
+        mp.put("count", count);
+        mp.put("timestamp", timestamp);
+        redisTemplate.opsForHash().put("LocationCount", location, mp);
+//        System.out.println("Received message: " + message);
     }
 
     @KafkaListener(topics = "big-data-topic-test-1", groupId = "output-group")
