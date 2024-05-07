@@ -12,11 +12,14 @@ spring:
     producer:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-
+  data:
+    mongodb:
+      uri: mongodb://root:big-data-root@192.168.101.101:27017/big-data
 logging:
   level:
     root: error
     org.springframework.web: info
+    org.apache.kafka: ERROR
 
 flink:
   job-manager:
