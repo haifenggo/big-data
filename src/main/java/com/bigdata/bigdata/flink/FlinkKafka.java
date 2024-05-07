@@ -2,7 +2,6 @@ package com.bigdata.bigdata.flink;
 
 import com.alibaba.fastjson.JSON;
 import com.bigdata.bigdata.entity.VideoData;
-import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -11,7 +10,6 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.runtime.ValueSerializer;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -26,12 +24,10 @@ import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -39,6 +35,9 @@ import java.util.*;
  */
 @Component
 public class FlinkKafka {
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     public void runJob() throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -58,7 +57,6 @@ public class FlinkKafka {
         properties = new Properties();
         properties.setProperty("bootstrap.servers", "192.168.101.101:9092");
 
-
         kafkaStream
                 .map(value -> JSON.parseObject(value, VideoData.class)) // 解析JSON字符串为VideoData对象
                 .filter(videoData -> videoData.getPublishLocation() != null)
@@ -71,14 +69,15 @@ public class FlinkKafka {
                         for (VideoData videoData : elements) {
                             distinctBVs.add(videoData.getBV());
                         }
-                        String timestamp = String.valueOf(Instant.now().toEpochMilli());
-                        String output = String.format("{\"publishLocation\": \"%s\", \"count\": \"%d\", \"timestamp\": \"%s\"}",
-                                key, distinctBVs.size(), timestamp);
-                        out.collect(output);
+                        Map<String, String > mp = new HashMap();
+                        mp.put("publishLocation", key);
+                        mp.put("count", String.valueOf(distinctBVs.size()));
+                        String string = JSON.toJSONString(mp);
+                        out.collect(string);
                     }
                 })
                 .addSink(new FlinkKafkaProducer<>(
-                        "output-topic-LocationCount",
+                        "output-topic",
                         new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
 
 
