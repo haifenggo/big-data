@@ -38,9 +38,12 @@ def readfile(filename):
             timestamps.append(eval(row[2]))
     return texts, timestamps
 
-def classify(texts, timestamps):
+def classify(comments):
     classified_texts = dict()
-
+    texts, timestamps = [], []
+    for value in comments:
+        texts.append(value["content"])
+        timestamps.append(value["commentRealTime"])
     # 遍历每个文字和时间戳
     for text, timestamp in zip(texts, timestamps):
         # 使用 datetime.fromtimestamp() 方法将时间戳转换为 datetime 对象
@@ -62,7 +65,7 @@ def classify(texts, timestamps):
     #     print()
     return classified_texts
 
-def analyze(classified_texts):
+def SentimentAnalysis(classified_texts):
     classified_emotions = {hour: {'positive': 0, 'negative': 0, 'neutral': 0} for hour in classified_texts.keys()}
     for hour, texts_in_hour in classified_texts.items():
         for item in texts_in_hour:
@@ -82,11 +85,23 @@ def analyze(classified_texts):
     #     .render("emotionAnalysis.html")
     # )
 
+def rankCount(all_data):
+    rankStats = defaultdict(lambda: {"coins": 0, "likes": 0, "favorites": 0})
+    for item in all_data:
+        rank = item["rank"]
+        coins = item["coins"]
+        likes = item["likes"]
+        favorite = item["favorites"]
+        rankStats[rank]["coins"] += coins
+        rankStats[rank]["likes"] += likes
+        rankStats[rank]["favorites"] += favorite
+    return rankStats
+
 if __name__ == '__main__':
     filename = './comment_comprehensive.csv'
     texts, timestamps = readfile(filename)
     classified_texts = classify(texts, timestamps)
-    classified_emotions = analyze(classified_texts)
+    classified_emotions = SentimentAnalysis(classified_texts)
     for hour, emotions in classified_emotions.items():
         print(f"hour {hour}:")
         print(emotions)

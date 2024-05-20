@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -36,6 +35,9 @@ import java.util.*;
  */
 @Component
 public class FlinkKafka {
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     public void runJob() throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -70,13 +72,12 @@ public class FlinkKafka {
                         Map<String, String > mp = new HashMap();
                         mp.put("publishLocation", key);
                         mp.put("count", String.valueOf(distinctBVs.size()));
-                        mp.put("timestamp", Instant.now().toString());
                         String string = JSON.toJSONString(mp);
                         out.collect(string);
                     }
                 })
                 .addSink(new FlinkKafkaProducer<>(
-                        "output-topic-LocationCount",
+                        "output-topic",
                         new SimpleStringSchema(), properties)); // 将结果发送到Kafka主题
 
 
