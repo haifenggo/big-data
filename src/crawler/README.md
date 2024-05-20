@@ -1,6 +1,6 @@
 # 爬虫类使用方法
 * 安装需要的python库`pip install -r requirements.txt`
-* 修改`config.ini`文件里面的mongoDB和redis配置
+* 修改`config.ini`文件里面的kafka和redis配置,mongo不用管
 * 运行`python main.py`
 * nohup启动后，爬虫会以守护进程的方式运行
 ## Mongo数据
