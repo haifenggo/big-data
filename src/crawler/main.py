@@ -4,6 +4,9 @@ import sys
 from configparser import ConfigParser
 from crawler import *
 from analyze import *
+from dbController import *
+from kafkaController import *
+from confluent_kafka import Producer, Consumer, KafkaException
 
 
 def connectMongo():
@@ -56,14 +59,12 @@ def testInsert():
     for x in mydoc:
         print(x)
 
-
 def Sentiment(all_comment, redisCli):
     # 情感分析
     classified_texts = classify(all_comment)
     classified_emotions = SentimentAnalysis(classified_texts)
     for key, value in sorted(classified_emotions.items()):
         redisCli.set(key, json.dumps(value))
-
 
 def likesAnalyze(all_data, redisCli):
     rankStats = rankCount(all_data)
@@ -73,20 +74,19 @@ def likesAnalyze(all_data, redisCli):
 
 
 if __name__ == '__main__':
-    mongoDB = connectMongo()
     redisDB = connectRedis()
+    kafkaProducer = connectKafka()
     # print(mongoDB)
     # print(redisDB)
     # sys.exit()
     print("开始")
     while True:
         all_data, all_comment = [], []
-        Get_data(all_data=all_data, all_comment=all_comment)
-        Save_data(all_data=all_data, all_comment=all_comment, mongoDB=mongoDB)
-        print(all_data)
+        Get_data(all_data = all_data, all_comment = all_comment)
         time.sleep(2)
-        getOthers(mongoDB, all_comment)
-
+        getOthers(all_data = all_data, all_comment = all_comment)
+        send_to_kafka(kafkaProducer, 'board', all_data)
+        send_to_kafka(kafkaProducer, 'comments', all_comment)
         Sentiment(all_comment, redisDB)
         likesAnalyze(all_data, redisDB)
         time.sleep(10)

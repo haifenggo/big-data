@@ -1,3 +1,7 @@
+# python crawler
+src/crawler/log/.*
+srt/crawler/__pycache__
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
