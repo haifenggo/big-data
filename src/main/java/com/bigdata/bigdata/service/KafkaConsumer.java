@@ -35,7 +35,7 @@ public class KafkaConsumer {
         Map<String, String > mp = new HashMap();
         mp.put("count", count);
         mp.put("timestamp", timestamp);
-        redisTemplate.opsForHash().put("LocationCount", location, mp);
+        redisTemplate.opsForHash().put("LocationCount", location, JSON.toJSONString(mp));
 //        System.out.println("Received message: " + message);
     }
 
@@ -47,15 +47,13 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = "board", groupId = "python-consumer")
     public void consume_board(String message) {
-        VideoData videoData = JSON.parseObject(message, VideoData.class);
-        mongoTemplate.insert(videoData);
-        System.out.println("Received board: " + videoData);
+        mongoTemplate.insert(JSON.parseObject(message, VideoData.class));
+//        System.out.println("Received board: " + videoData);
     }
 
     @KafkaListener(topics = "comments", groupId = "python-consumer")
     public void consume_comments(String message) {
-        Comment comment = JSON.parseObject(message, Comment.class);
-        mongoTemplate.insert(comment);
-        System.out.println("Received message: " + comment);
+        mongoTemplate.insert(JSON.parseObject(message, Comment.class));
+//        System.out.println("Received message: " + comment);
     }
 }

@@ -1,7 +1,6 @@
 package com.bigdata.bigdata;
 
 import com.bigdata.bigdata.task.LocationCountTask;
-import com.bigdata.bigdata.utils.CsvFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,12 +14,10 @@ public class BigDataApplication implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context = SpringApplication.run(BigDataApplication.class, args);
-        LocationCountTask flinkJobComponent = context.getBean(LocationCountTask.class);
-        flinkJobComponent.runJob();
+//        LocationCountTask flinkJobComponent = context.getBean(LocationCountTask.class);
+//        flinkJobComponent.runJob();
     }
 
-    @Autowired
-    CsvFileReader csvFileReader;
 
     @Override
     public void run(String... args) {
