@@ -17,6 +17,8 @@ from sklearn.datasets import load_boston
 import pandas as pd
 import re
 
+from kafkaController import *
+
 proxy = {'http':'122.225.30.179:20235'}
 cookie = {'domain': '/',
         'expires': 'false',
@@ -57,13 +59,15 @@ def Parse(text, all_data, all_comment):
     if dict['code'] != 0:
         time.sleep(1)
         return False
+    rank = 0
     for i in dict['data']['list']:
         # print(i)
         temp={"title": i['title'], "ownerName": i['owner']['name'], "views": i['stat']['view'], "comments": i['stat']['danmaku'],
             "favorites": i['stat']['favorite'], "likes": i['stat']['like'], "coins": i['stat']['coin'],
             "shares": i['stat']['share'], "pubLocation": i.get('pub_location', ''),
             "uploadTime": i['pubdate'], "duation": i['duration'], "rcmdReason": i['rcmd_reason']['content'],
-            "bvid": i['bvid']}
+            "bvid": i['bvid'], "rank": rank, "board": "comprehensive"}
+        rank = rank + 1
         cid_list.append(i['cid'])
         all_data.append(temp)
     comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
@@ -73,14 +77,16 @@ def Parse(text, all_data, all_comment):
     # writeComment2file('comment_comprehensive.csv', comment_list, comment_video_time_lsit, comment_real_time_list)
     return True
 
+
+
 #3.对数据进行保存
-def Save_data(all_data, all_comment, mongoDB):
+def Save_data(all_data, all_comment):
     collection = mongoDB["comprehensive"]
     collection.insert_many(all_data)
     collection = mongoDB["comprehensiveComments"]
     collection.insert_many(all_comment)
 
-def getOthers(mongoDB, all_comment):
+def getOthers(all_data, all_comment):
     header={
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -118,27 +124,17 @@ def getOthers(mongoDB, all_comment):
             temp={"title": i['title'], "ownerName": i['owner']['name'], "views": i['stat']['view'], "comments": i['stat']['danmaku'],
                 "favorites": i['stat']['favorite'], "likes": i['stat']['like'], "coins": i['stat']['coin'],
                 "shares": i['stat']['share'], "pubLocation": i.get('pub_location', ''),
-                "uploadTime": i['pubdate'], "duation": i['duration'], "bvid": i['bvid'], "rank": rank}
+                "uploadTime": i['pubdate'], "duation": i['duration'], "bvid": i['bvid'], "rank": rank, "board": filenames[j]}
             rank += 1
             cid_list.append(i['cid'])
             data.append(temp)
-        # 插入mongo
-        collection = mongoDB[filenames[j]]
-        collection.insert_many(data)
         comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
         comments_dicts = []
         for i in range(len(comment_list)):
             comments_dicts.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
                                     "commentRealTime": comment_real_time_list[i]})
-        collection = mongoDB[filenames[j] + "Comments"]
-        collection.insert_many(comments_dicts)
         all_comment.append(comments_dicts)
-        # writeComment2file('comment_' + filenames[j], comment_list, comment_video_time_lsit, comment_real_time_list)
-        # with open(filenames[j],mode='w',encoding='utf-8') as fp:
-        #     writer=csv.writer(fp)#创建一个csv的写对象
-        #     writer.writerow(['视频名称','up主','播放量','评论数','收藏数','点赞数','投币数','分享数','发布地点','发布时间', '视频时长','BV号'])#写一行数据作为数据头部
-        #     for i in data:
-        #         writer.writerow(i)#把all_data的数据写进去
+        all_data.append(data)
         res.close()
         time.sleep(1)
 

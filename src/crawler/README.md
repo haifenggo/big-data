@@ -1,11 +1,11 @@
 # 爬虫类使用方法
 * 安装需要的python库`pip install -r requirements.txt`
 * 修改`config.ini`文件里面的mongoDB和redis配置
-* 运行`nohup python main.py > log.log 2>&1 &`
+* 运行`python main.py`
 * nohup启动后，爬虫会以守护进程的方式运行
 ## Mongo数据
 ### 分区数据
-对于每一个分区，都有一个collection，名字对应
+对于每一个分区，名字对应对应分区的字段名是
 * comprehensive: 综合热榜
 * national_original: 国创相关
 * anime: 动漫
@@ -36,7 +36,7 @@
 * rank: 在当前分区的排名
 * rcmdReason: 推荐理由（仅综合热榜有）
 ### 分区弹幕
-对于每一个分区的弹幕，所在是collection的名字是分区名后面加Comments。如comprehensive分区的弹幕是comprehensiveComments
+对于每一个分区的弹幕，所在的topic是comments.
 弹幕包含三种数据：
 * content: 弹幕内容
 * videoTime: 在视频里面出现的时间（相对于视频时间）
