@@ -11,6 +11,8 @@ def connectKafka():
         # 获取生产者配置
         producer_conf = dict(config['producer'])
 
+
+
         # 创建生产者实例
         producer = Producer(producer_conf)
         return producer
@@ -29,7 +31,7 @@ def send_to_kafka(producer, topic, data):
     try:
         for item in data:
             # 将字典转换为 JSON 格式的字符串
-            message = json.dumps(item)
+            message = json.dumps(item, ensure_ascii=False)#.encode('utf-8')  # 编码为 UTF-8 字节串
             # 发送消息
             producer.produce(topic, value=message)
         producer.flush()

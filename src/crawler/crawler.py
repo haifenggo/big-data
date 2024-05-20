@@ -35,7 +35,8 @@ def Get_data(all_data, all_comment):
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     url='https://api.bilibili.com/x/web-interface/popular'
-    for i in range(1,12):
+    # for i in range(1,12):
+    for i in range(1,2):
         param={
             'ps': 20,
             'pn': i
@@ -65,14 +66,14 @@ def Parse(text, all_data, all_comment):
         temp={"title": i['title'], "ownerName": i['owner']['name'], "views": i['stat']['view'], "comments": i['stat']['danmaku'],
             "favorites": i['stat']['favorite'], "likes": i['stat']['like'], "coins": i['stat']['coin'],
             "shares": i['stat']['share'], "pubLocation": i.get('pub_location', ''),
-            "uploadTime": i['pubdate'], "duation": i['duration'], "rcmdReason": i['rcmd_reason']['content'],
+            "uploadTime": i['pubdate'], "duration": i['duration'], "rcmdReason": i['rcmd_reason']['content'],
             "bvid": i['bvid'], "rank": rank, "board": "comprehensive"}
         rank = rank + 1
         cid_list.append(i['cid'])
         all_data.append(temp)
     comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
     for i in range(len(comment_list)):
-        all_comment.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
+        all_comment.append({"content": comment_list[i], "videoTime": comment_video_time_list[i],
                                 "commentRealTime": comment_real_time_list[i]})
     # writeComment2file('comment_comprehensive.csv', comment_list, comment_video_time_lsit, comment_real_time_list)
     return True
@@ -147,6 +148,7 @@ def iterCrawlComment(data):
         video_time_list += v
         real_time_list += r
         time.sleep(0.5)
+        break
     return content_list, video_time_list, real_time_list
 
 def crawlComment(cid, proxy):

@@ -70,13 +70,13 @@ def likesAnalyze(all_data, redisCli):
     rankStats = rankCount(all_data)
     # 放到redis的哈希表
     for rank, stats in rankStats.items():
-        r.hmset(f'rank:{rank}', stats)
+        redisCli.hmset(f'rank:{rank}', stats)
 
 
 if __name__ == '__main__':
     redisDB = connectRedis()
     kafkaProducer = connectKafka()
-    # print(mongoDB)
+    print(kafkaProducer)
     # print(redisDB)
     # sys.exit()
     print("开始")
@@ -84,9 +84,12 @@ if __name__ == '__main__':
         all_data, all_comment = [], []
         Get_data(all_data = all_data, all_comment = all_comment)
         time.sleep(2)
-        getOthers(all_data = all_data, all_comment = all_comment)
-        send_to_kafka(kafkaProducer, 'board', all_data)
-        send_to_kafka(kafkaProducer, 'comments', all_comment)
+        # getOthers(all_data = all_data, all_comment = all_comment)
+        print("=====================================")
+        print("================send=================")
+        print("=====================================")
+        send_to_kafka(kafkaProducer, 'board', all_data[:10])
+        send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
         Sentiment(all_comment, redisDB)
         likesAnalyze(all_data, redisDB)
         time.sleep(10)

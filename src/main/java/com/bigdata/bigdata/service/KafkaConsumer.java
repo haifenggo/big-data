@@ -2,9 +2,13 @@ package com.bigdata.bigdata.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.bigdata.bigdata.entity.Comment;
+import com.bigdata.bigdata.entity.VideoData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,8 +21,13 @@ public class KafkaConsumer {
     @Autowired
     RedisTemplate redisTemplate;
 
-    @KafkaListener(topics = "output-topic-LocationCount", groupId = "output-group-LocationCount")
-    public void consume(String message) {
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @KafkaListener(topics = "locationCount-topic", groupId = "locationCount-consume-group")
+    public void consumeLocationCount(String message) {
         JSONObject locationCount = JSON.parseObject(message);
         String location = (String)locationCount.get("publishLocation");
         String count = (String)locationCount.get("count");
@@ -30,18 +39,23 @@ public class KafkaConsumer {
 //        System.out.println("Received message: " + message);
     }
 
-    @KafkaListener(topics = "big-data-topic-test-1", groupId = "output-group")
-    public void consume_video(String message) {
-        System.out.println("Received message-1: " + message);
+    @KafkaListener(topics = "big-data-topic-test", groupId = "output-group")
+    public void consume_test(String message) {
+        System.out.println("Received message: " + message);
     }
 
-    /**
-     * topics是Kafka中的消息分类。生产者将消息发送到特定的主题，消费者则从特定的主题中读取消息。
-     * 一个主题可以被多个消费者订阅。
-     * groupId是消费者组的标识。
-     * 在Kafka中，消费者组是一种可以将消费者进行逻辑分组的方式。
-     * 同一个消费者组内的消费者可以订阅一个或多个主题，
-     * 并且Kafka会保证每个消息只会被消费者组内的一个消费者消费。
-     * 这样可以实现负载均衡和容错。
-     */
+
+    @KafkaListener(topics = "board", groupId = "python-consumer")
+    public void consume_board(String message) {
+        VideoData videoData = JSON.parseObject(message, VideoData.class);
+        mongoTemplate.insert(videoData);
+        System.out.println("Received board: " + videoData);
+    }
+
+    @KafkaListener(topics = "comments", groupId = "python-consumer")
+    public void consume_comments(String message) {
+        Comment comment = JSON.parseObject(message, Comment.class);
+        mongoTemplate.insert(comment);
+        System.out.println("Received message: " + comment);
+    }
 }
