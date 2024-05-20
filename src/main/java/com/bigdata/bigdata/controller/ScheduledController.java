@@ -40,7 +40,7 @@ public class ScheduledController {
         };
         ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(locationCountTask, new CronTrigger(corn));
         scheduledMap.put("locationCountTask", schedule);
-        return Result.success("开启成功");
+        return Result.success("/websocket/locationCount");
     }
 
     @GetMapping("/cancelLocationCountTask")
