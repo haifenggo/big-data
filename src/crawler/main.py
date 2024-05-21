@@ -38,10 +38,10 @@ def connectRedis():
     # 从配置文件中获取Redis连接参数
     redisHost = config.get('redis', 'host')
     redisPort = config.getint('redis', 'port')
-    # redisPassword = config.get('redis', 'password')
+    redisPassword = config.get('redis', 'password')
     # 连接Redis数据库
-    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
-    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
+    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
+    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
     return redisClient
 
 
@@ -75,7 +75,7 @@ def likesAnalyze(all_data, redisCli):
 
 if __name__ == '__main__':
     redisDB = connectRedis()
-    # kafkaProducer = connectKafka()
+    kafkaProducer = connectKafka()
     # print(kafkaProducer)
     print(redisDB)
     print("\033[1;33m" + "=" *12 + "Crawler Start" + "=" * 12 + "\033[0m")
@@ -83,12 +83,12 @@ if __name__ == '__main__':
         all_data, all_comment = [], []
         Get_data(all_data = all_data, all_comment = all_comment)
         time.sleep(2)
-        # getOthers(all_data = all_data, all_comment = all_comment)
+        getOthers(all_data = all_data, all_comment = all_comment)
         print("\033[1m" + "=" * 37)
         print("\033[1;33m" + "=" * 16 + "send" + "=" * 16 + "\033[0m")
         print("\033[1m" + "=" * 37)
-        # send_to_kafka(kafkaProducer, 'board', all_data[:10])
-        # send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
-        # Sentiment(all_comment, redisDB)
+        send_to_kafka(kafkaProducer, 'board', all_data[:10])
+        send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
+        Sentiment(all_comment, redisDB)
         likesAnalyze(all_data, redisDB)
         time.sleep(10)
