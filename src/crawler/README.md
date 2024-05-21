@@ -44,6 +44,6 @@
 时间都使用时间戳表示
 ## Redis数据
 ### 情感分析
-redis里面存储了情感趋势。set里面有多个key，这个key是时间，value对应有positive，negative和neutral三种的值，表示每一个时间段内三种情感的数量
+redis里面存储了情感趋势。key是`sentiment_trend`, value是`json`，get出来之后转成`json`
 ### 点赞投币趋势
-redis里面存储量点赞投币其实。哈希表里面有多个key，这个key是排名，value对应有coins，likes和favorites三种的值，表示每一个排名的投币、点赞和收藏数量。
+redis里面存储量点赞投币趋势。key是`likes_trend`, value是`json`get出来之后转成`json`

@@ -47,6 +47,7 @@ def Get_data(all_data, all_comment):
             res.close()
             if flag is True:
                 break
+            
 
 #2.对爬取到的数据进行解析，获取每一条视频数据的标题，Up主，播放量，评论数
 
