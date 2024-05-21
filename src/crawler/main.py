@@ -41,6 +41,7 @@ def connectRedis():
     redisPassword = config.get('redis', 'password')
     # 连接Redis数据库
     redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
+    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
     return redisClient
 
 
@@ -63,31 +64,29 @@ def Sentiment(all_comment, redisCli):
     # 情感分析
     classified_texts = classify(all_comment)
     classified_emotions = SentimentAnalysis(classified_texts)
-    for key, value in sorted(classified_emotions.items()):
-        redisCli.set(key, json.dumps(value))
+    print(classified_emotions)
+    redisCli.set('sentiment_trend', json.dumps(classified_emotions))
 
 def likesAnalyze(all_data, redisCli):
     rankStats = rankCount(all_data)
-    # 放到redis的哈希表
-    for rank, stats in rankStats.items():
-        redisCli.hmset(f'rank:{rank}', stats)
+    print(rankStats)
+    redisCli.set('likes_trend', json.dumps(rankStats))
 
 
 if __name__ == '__main__':
     redisDB = connectRedis()
     kafkaProducer = connectKafka()
-    print(kafkaProducer)
-    # print(redisDB)
-    # sys.exit()
-    print("开始")
+    # print(kafkaProducer)
+    print(redisDB)
+    print("\033[1;33m" + "=" *12 + "Crawler Start" + "=" * 12 + "\033[0m")
     while True:
         all_data, all_comment = [], []
         Get_data(all_data = all_data, all_comment = all_comment)
         time.sleep(2)
-        # getOthers(all_data = all_data, all_comment = all_comment)
-        print("=====================================")
-        print("================send=================")
-        print("=====================================")
+        getOthers(all_data = all_data, all_comment = all_comment)
+        print("\033[1m" + "=" * 37)
+        print("\033[1;33m" + "=" * 16 + "send" + "=" * 16 + "\033[0m")
+        print("\033[1m" + "=" * 37)
         send_to_kafka(kafkaProducer, 'board', all_data[:10])
         send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
         Sentiment(all_comment, redisDB)

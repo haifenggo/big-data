@@ -17,6 +17,7 @@ from sklearn.datasets import load_boston
 import pandas as pd
 import re
 import datetime
+from collections import defaultdict
 
 # emotionAnalysis.py
 '''依赖模块
@@ -47,7 +48,7 @@ def classify(comments):
     # 遍历每个文字和时间戳
     for text, timestamp in zip(texts, timestamps):
         # 使用 datetime.fromtimestamp() 方法将时间戳转换为 datetime 对象
-        dt = datetime.datetime.fromtimestamp(timestamp)
+        dt = datetime.datetime.fromtimestamp(int(timestamp))
         # print(dt)
         # 取得时间戳所属的小时
         hour = dt.hour
