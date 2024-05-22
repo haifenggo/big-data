@@ -35,8 +35,8 @@ def Get_data(all_data, all_comment):
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     url='https://api.bilibili.com/x/web-interface/popular'
-    for i in range(1,12):
-    # for i in range(1,2):
+    # for i in range(1,12):
+    for i in range(1,2):
         param={
             'ps': 20,
             'pn': i
@@ -48,6 +48,7 @@ def Get_data(all_data, all_comment):
             res.close()
             if flag is True:
                 break
+            
 
 #2.对爬取到的数据进行解析，获取每一条视频数据的标题，Up主，播放量，评论数
 
@@ -148,7 +149,7 @@ def iterCrawlComment(data):
         video_time_list += v
         real_time_list += r
         time.sleep(0.5)
-        # break
+        break
     return content_list, video_time_list, real_time_list
 
 def crawlComment(cid, proxy):

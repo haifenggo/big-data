@@ -1,8 +1,8 @@
-package com.bigdata.bigdata.task;
+package com.bigdata;
 
 
 import com.alibaba.fastjson.JSON;
-import com.bigdata.bigdata.entity.VideoData;
+import com.bigdata.entity.VideoData;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -13,10 +13,6 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.*;
@@ -24,7 +20,6 @@ import java.util.*;
 /**
  * 2024/4/9 21:52
  */
-@Component
 public class LocationCountTask {
 
     public void runJob() throws Exception {
@@ -33,7 +28,7 @@ public class LocationCountTask {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "192.168.101.101:9092");
         properties.setProperty("group.id", "video-locationCount");
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.setProperty("auto.offset.reset", "earliest");
         FlinkKafkaConsumer<String> kafkaConsumer = new FlinkKafkaConsumer<>(
                 "board", // topic
                 new SimpleStringSchema(), // schema
