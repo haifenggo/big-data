@@ -1,15 +1,23 @@
 package com.bigdata.bigdata.service;
 
+import com.bigdata.bigdata.entity.Result;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
+import javax.annotation.PostConstruct;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * 2024/5/7
@@ -27,6 +35,19 @@ public class WebSocketServer {
 
     public static ConcurrentHashMap<String, WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
 
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskSchedulerBean;
+
+    @Autowired
+    static ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+
+    @PostConstruct
+    public void init() {
+        threadPoolTaskScheduler = threadPoolTaskSchedulerBean;
+    }
+
+    private static final Map<String, ScheduledFuture<?>> scheduledMap = new ConcurrentHashMap<>();
 
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
@@ -34,6 +55,16 @@ public class WebSocketServer {
     private Session session;
 
     private String socketName;
+
+
+    public static Boolean addSchedule(String taskName, Runnable task, Trigger trigger) {
+        if (scheduledMap.containsKey(taskName)) {
+            return false;
+        }
+        ScheduledFuture<?> schedule = threadPoolTaskScheduler.schedule(task, trigger);
+        scheduledMap.put(taskName, schedule);
+        return true;
+    }
 
     /**
      * 连接建立成功调用的方法
@@ -60,6 +91,13 @@ public class WebSocketServer {
         if (webSocketMap.containsKey(socketName)) {
             webSocketMap.remove(socketName);
             subOnlineCount();
+        }
+        if (scheduledMap.containsKey(socketName)) {
+            ScheduledFuture<?> scheduledFuture = scheduledMap.get(socketName);
+            if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
+                scheduledFuture.cancel(true);
+            }
+            scheduledMap.remove(socketName);
         }
     }
 
