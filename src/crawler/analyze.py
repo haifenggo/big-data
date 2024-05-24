@@ -13,11 +13,11 @@ import seaborn as sns
 import time
 from sklearn import datasets
 from sklearn.linear_model import LinearRegression
-from sklearn.datasets import load_boston
 import pandas as pd
 import re
 import datetime
 from collections import defaultdict
+import pymongo
 
 # emotionAnalysis.py
 '''依赖模块
@@ -98,13 +98,72 @@ def rankCount(all_data):
         rankStats[rank]["favorites"] += favorite
     return rankStats
 
-if __name__ == '__main__':
-    filename = './comment_comprehensive.csv'
-    texts, timestamps = readfile(filename)
-    classified_texts = classify(texts, timestamps)
-    classified_emotions = SentimentAnalysis(classified_texts)
-    for hour, emotions in classified_emotions.items():
-        print(f"hour {hour}:")
-        print(emotions)
+def connect():
+    # 读取配置文件
+    # 从配置文件中获取MongoDB连接参数
+    host = 'localhost'
+    port = 27017
+    # username = config.get('mongodb', 'username')
+    # password = config.get('mongodb', 'password')
+    database = 'bigdata'
+    # 构建MongoDB URI
+    # uri = f"mongodb://{username}:{password}@{host}:{port}/{database}"
+    uri = f"mongodb://{host}:{port}/{database}"
+    # 连接MongoDB数据库
+    client = pymongo.MongoClient(uri)
+    # 选择数据库和集合
+    mydb = client[database]
+    # 现在你可以执行MongoDB操作，比如插入、查询等
+    return mydb
 
+def calcBoardTop10OwnerViews(all_data):
+    db = connect()
+    col = db['board']
+    cur = col.find()
+    d = []
+    for line in cur:
+        d.append(line)
+    df = pd.DataFrame(d)
+    # 按UP主和分区计算平均播放量
+    avg_views_by_owner_category = df.groupby(['ownerName', 'board'])['views'].mean().unstack().fillna(0)
+    # 获取各分区前10名UP主
+    top10_owners_by_category = avg_views_by_owner_category.apply(lambda x: x.sort_values(ascending=False).head(10))
+    # 转换为JSON格式
+    top10_owners_json = {}
+    for category in top10_owners_by_category.columns:
+        top10_owners_json[category] = top10_owners_by_category[category].sort_values(ascending=False).head(10).to_dict()
+    print(top10_owners_json)
+    return top10_owners_json
+
+def calcBoardTop10Views(all_data):
+    df = pd.DataFrame(all_data)
+    # 分区计算平均播放量
+    avg_views_by_category = df.groupby('board')['views'].mean().reset_index()
+
+    # 获取每个分区前十名平均播放量
+    avg_views_by_category_dict = {}
+    for idx, row in avg_views_by_category.iterrows():
+        avg_views_by_category_dict[row['board']] = row['views']
+
+    # 转换为 JSON 格式
+    json_data = json.dumps(avg_views_by_category_dict, ensure_ascii=False, indent=4)
+    return json_data
+
+def calcDanmakuBoard(all_data):
+    df = pd.DataFrame(all_data)
+    # 分区计算平均播放量
+    avg_views_by_category = df.groupby('board')['comments'].mean().reset_index()
+
+    # 获取每个分区前十名平均播放量
+    avg_views_by_category_dict = {}
+    for idx, row in avg_views_by_category.iterrows():
+        avg_views_by_category_dict[row['board']] = row['comments']
+
+    # 转换为 JSON 格式
+    json_data = json.dumps(avg_views_by_category_dict, ensure_ascii=False, indent=4)
+    return json_data
+
+def totalStatsByBoard(data):
+    total_stats_by_category = data.groupby('board')[['views', 'likes', 'comments', 'coins', 'shares', 'favorites']].sum().to_dict()
+    return total_stats_by_category
 
