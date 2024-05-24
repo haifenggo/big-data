@@ -136,33 +136,34 @@ def calcBoardTop10OwnerViews(all_data):
     return top10_owners_json
 
 def calcBoardTop10Views(all_data):
-    db = connect()
-    col = db['board']
-    cur = col.find()
-    d = []
-    for line in cur:
-        d.append(line)
-    df = pd.DataFrame(d)
-    # 按UP主和分区计算平均播放量
-    avg_views_by_category = df.groupby(['board'])['views'].mean().unstack().fillna(0)
-    top10_by_category = avg_views_by_category.apply(lambda x: x.sort_values(ascending=False).head(10))
-    print(top10_by_category)
-    # 转换为JSON格式
-    top10_json = {}
-    for category in top10_owners_by_category.columns:
-        top10_json[category] = top10_by_category[category].sort_values(ascending=False).head(10).to_dict()
-    print(top10_owners_json)
-    return top10_owners_json
+    df = pd.DataFrame(all_data)
+    # 分区计算平均播放量
+    avg_views_by_category = df.groupby('board')['views'].mean().reset_index()
 
-def calcDanmakuBoard(data):
-    avg = data.groupby('borad')['comments'].mean().sort_values().to_dict()
-    return avg
+    # 获取每个分区前十名平均播放量
+    avg_views_by_category_dict = {}
+    for idx, row in avg_views_by_category.iterrows():
+        avg_views_by_category_dict[row['board']] = row['views']
+
+    # 转换为 JSON 格式
+    json_data = json.dumps(avg_views_by_category_dict, ensure_ascii=False, indent=4)
+    return json_data
+
+def calcDanmakuBoard(all_data):
+    df = pd.DataFrame(all_data)
+    # 分区计算平均播放量
+    avg_views_by_category = df.groupby('board')['comments'].mean().reset_index()
+
+    # 获取每个分区前十名平均播放量
+    avg_views_by_category_dict = {}
+    for idx, row in avg_views_by_category.iterrows():
+        avg_views_by_category_dict[row['board']] = row['comments']
+
+    # 转换为 JSON 格式
+    json_data = json.dumps(avg_views_by_category_dict, ensure_ascii=False, indent=4)
+    return json_data
 
 def totalStatsByBoard(data):
     total_stats_by_category = data.groupby('board')[['views', 'likes', 'comments', 'coins', 'shares', 'favorites']].sum().to_dict()
     return total_stats_by_category
-
-if __name__ == '__main__':
-    calcBoardTop10Views([])
-
 

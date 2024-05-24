@@ -41,34 +41,16 @@ def connectRedis():
     # 从配置文件中获取Redis连接参数
     redisHost = config.get('redis', 'host')
     redisPort = config.getint('redis', 'port')
-    redisPassword = config.get('redis', 'password')
+    # redisPassword = config.get('redis', 'password')
     # 连接Redis数据库
-    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
-    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
+    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
+    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
     return redisClient
-
-
-def testInsert():
-    # 插入一条数据
-    mydict = {"name": "John", "address": "Highway 37"}
-    x = mycol.insert_one(mydict)
-    # 打印插入的数据的ID
-    print(x.inserted_id)
-    # 查询所有数据
-    for x in mycol.find():
-        print(x)
-    # 查询特定条件的数据
-    myquery = {"address": "Highway 37"}
-    mydoc = mycol.find(myquery)
-    for x in mydoc:
-        print(x)
-
 
 def Sentiment(all_comment, redisCli):
     # 情感分析
     classified_texts = classify(all_comment)
     classified_emotions = SentimentAnalysis(classified_texts)
-    # print(classified_emotions)
     redisCli.set('sentiment_trend', json.dumps(classified_emotions))
 
 
@@ -105,24 +87,33 @@ def LDA(comment_list, redisCli):
         content = comment_list[i]["content"]
         board_comments[board].append(content)
     board_word_list = defaultdict(list)
-    board_words = defaultdict(list)
     all_words = []
     for key, value in board_comments.items():
         li = get_word_list(value)
         for w in li:
             all_words.extend(w)
         board_word_list[key] = li
-        board_words[key] = get_words(li)
 
     for key, value in board_word_list.items():
-        topics[key] = lda_topic_modeling(value)
-    
+        ret = lda_topic_modeling(value)
+        new_topic = []
+        for topic in ret:
+            tdict = {}
+            for word in topic:
+                tdict.update(word)
+            new_topic.append(tdict) 
+        topics[key] = new_topic
     redisCli.set('lda_topics', json.dumps(topics))
 
     counterRet = collections.Counter(all_words) #对分词做词频统计
-    print(counterRet)
     wordCloud(counterRet)
 
+def boardAverageTop(all_data, redisCli):
+    print(all_data)
+    top_10_views = calcBoardTop10Views(all_data)
+    top_10_comments = calcDanmakuBoard(all_data)
+    redisCli.set('top_10_views', top_10_views)
+    redisCli.set('top_10_comments', top_10_comments)
 
 def getData():
     db = connect()
@@ -141,24 +132,25 @@ if __name__ == '__main__':
     redisDB = connectRedis()
     kafkaProducer = connectKafka()
     # print(kafkaProducer)
-    print(redisDB)
+    # print(redisDB)
     print("=" * 12 + "Crawler Start" + "=" * 12)
     while True:
         all_data, all_comment = [], []
         Get_data(all_data=all_data, all_comment=all_comment)
         time.sleep(2)
-        # getOthers(all_data = all_data, all_comment = all_comment)
+        getOthers(all_data = all_data, all_comment = all_comment)
         print("=====================================")
         print("================send=================")
         print("=====================================")
         send_to_kafka(kafkaProducer, 'board', all_data[:10])
         send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
-        words = trans(all_comment)
+        # 前十名统计
+        boardAverageTop(all_data, redisDB)
         # 情感分析
-        Sentiment(words, redisDB)
+        Sentiment(all_comment, redisDB)
         # 点赞等趋势
         likesAnalyze(all_data, redisDB)
         # LDA主题分析
         LDA(all_comment, redisDB)
-        time.sleep(10)
         print("================end==================")
+        time.sleep(10)
