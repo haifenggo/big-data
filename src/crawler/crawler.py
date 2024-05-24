@@ -13,7 +13,6 @@ import seaborn as sns
 import time
 from sklearn import datasets
 from sklearn.linear_model import LinearRegression
-from sklearn.datasets import load_boston
 import pandas as pd
 import re
 
@@ -75,11 +74,9 @@ def Parse(text, all_data, all_comment):
     comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
     for i in range(len(comment_list)):
         all_comment.append({"content": comment_list[i], "videoTime": comment_video_time_list[i],
-                                "commentRealTime": comment_real_time_list[i]})
+                                "commentRealTime": comment_real_time_list[i], "board": "comprehensive"})
     # writeComment2file('comment_comprehensive.csv', comment_list, comment_video_time_lsit, comment_real_time_list)
     return True
-
-
 
 #3.对数据进行保存
 def Save_data(all_data, all_comment):
@@ -105,8 +102,8 @@ def getOthers(all_data, all_comment):
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=181&type=all',
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=origin',
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=rookie']
-    filenames = ['national_original.csv', 'anime.csv', 'music.csv', 'dancing.csv', 'games.csv', 'knowledge.csv',
-                'technology.csv', 'sports.csv', 'fashion.csv', 'fun.csv', 'movies.csv', 'origin.csv', 'rookie.csv']
+    filenames = ['national_original', 'anime', 'music', 'dancing', 'games', 'knowledge',
+                'technology', 'sports', 'fashion', 'fun', 'movies', 'origin', 'rookie']
 
     global proxy, cookie
     for j in range(len(urls)):
@@ -134,7 +131,7 @@ def getOthers(all_data, all_comment):
         comments_dicts = []
         for i in range(len(comment_list)):
             comments_dicts.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
-                                    "commentRealTime": comment_real_time_list[i]})
+                                    "commentRealTime": comment_real_time_list[i], "board": filenames[j]})
         all_comment.append(comments_dicts)
         all_data.append(data)
         res.close()

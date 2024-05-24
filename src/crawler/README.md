@@ -1,4 +1,5 @@
 # 爬虫类使用方法
+* 需要`python3.9`
 * 安装需要的python库`pip install -r requirements.txt`
 * 修改`config.ini`文件里面的kafka和redis配置,mongo不用管
 * 运行`python main.py`
@@ -47,3 +48,37 @@
 redis里面存储了情感趋势。key是`sentiment_trend`, value是`json`，get出来之后转成`json`
 ### 点赞投币趋势
 redis里面存储量点赞投币趋势。key是`likes_trend`, value是`json`get出来之后转成`json`
+### LDA 主题topics
+使用LDA算法为每个分区的弹幕划分了三个主题，每个主题都带有几个关键词。在redis中，key是`lda_topics`，value是`json`。
+如下所示：
+* comprehensive是分区名字，里面的数组是每一个数组表示一个主题的关键词, 第二个是关键词的权重。建议画热力图什么的。
+```
+{
+    "comprehensive": [
+        [
+            {
+                "aaa": "0.05682724"
+            },
+            {
+                "bbb": "0.032545965"
+            },
+            {
+                "ccc": "0.03247017"
+            },
+        ],
+        [
+            {
+                "ab": "0.040921286"
+            },
+            {
+                "bc": "0.023386508"
+            },
+        ]
+    ]
+}
+```
+### 高频词
+使用LDA算法为每个分区跳出了十个高频词。在redis中，key是`hot_words`，value是`json`。
+
+### 词云图
+生成了一张词云图，放在`/src/main/resources/data`目录下
