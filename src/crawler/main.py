@@ -63,16 +63,18 @@ def testInsert():
     for x in mydoc:
         print(x)
 
+
 def Sentiment(all_comment, redisCli):
     # 情感分析
     classified_texts = classify(all_comment)
     classified_emotions = SentimentAnalysis(classified_texts)
-    print(classified_emotions)
+    # print(classified_emotions)
     redisCli.set('sentiment_trend', json.dumps(classified_emotions))
+
 
 def likesAnalyze(all_data, redisCli):
     rankStats = rankCount(all_data)
-    print(rankStats)
+    # print(rankStats)
     redisCli.set('likes_trend', json.dumps(rankStats))
 
 def connect():
@@ -99,7 +101,7 @@ def LDA(comment_list, redisCli):
     topics = defaultdict(list)
     # 将评论按照板块分类
     for i in range(len(comment_list)):
-        board = comment_list[i]["borad"]
+        board = comment_list[i]["board"]
         content = comment_list[i]["content"]
         board_comments[board].append(content)
     board_word_list = defaultdict(list)
@@ -136,17 +138,19 @@ def getData():
     return d
 
 if __name__ == '__main__':
-    # redisDB = connectRedis()
-    # kafkaProducer = connectKafka()
-    print("\033[1;33m" + "=" *12 + "Crawler Start" + "=" * 12 + "\033[0m")
+    redisDB = connectRedis()
+    kafkaProducer = connectKafka()
+    # print(kafkaProducer)
+    print(redisDB)
+    print("=" * 12 + "Crawler Start" + "=" * 12)
     while True:
         all_data, all_comment = [], []
-        Get_data(all_data = all_data, all_comment = all_comment)
-        # time.sleep(2)
-        getOthers(all_data = all_data, all_comment = all_comment)
-        print("\033[1m" + "=" * 37)
-        print("\033[1;33m" + "=" * 16 + "send" + "=" * 16 + "\033[0m")
-        print("\033[1m" + "=" * 37)
+        Get_data(all_data=all_data, all_comment=all_comment)
+        time.sleep(2)
+        # getOthers(all_data = all_data, all_comment = all_comment)
+        print("=====================================")
+        print("================send=================")
+        print("=====================================")
         send_to_kafka(kafkaProducer, 'board', all_data[:10])
         send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
         words = trans(all_comment)
@@ -157,3 +161,4 @@ if __name__ == '__main__':
         # LDA主题分析
         LDA(all_comment, redisDB)
         time.sleep(10)
+        print("================end==================")

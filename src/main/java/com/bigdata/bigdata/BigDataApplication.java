@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class BigDataApplication implements CommandLineRunner {
+public class BigDataApplication/* implements CommandLineRunner*/ {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context = SpringApplication.run(BigDataApplication.class, args);
@@ -19,8 +19,8 @@ public class BigDataApplication implements CommandLineRunner {
     }
 
 
-    @Override
-    public void run(String... args) {
-//        csvFileReader.read();
-    }
+//    @Override
+//    public void run(String... args) {
+////        csvFileReader.read();
+//    }
 }
