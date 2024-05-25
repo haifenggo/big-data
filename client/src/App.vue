@@ -1,15 +1,27 @@
 <template>
     <div>
-        <Map v-if="isMapShow" :webSocketurl="baseUrl + webSocketList?.length ? webSocketList[0] : ''"> </Map>
-    </div>
+        <h1 style="margin:0 auto ;font-size: 20px;margin-top: 10px" align="center">B站热榜分析大数据项目</h1>
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;padding: 20px;justify-content: space-around;">
+            <Map class="border"> </Map>
+            <LinksTrend class="border"></LinksTrend>
 
+            <SentimentTrend class="border"></SentimentTrend>
+            <div style="width: 400px;">
+                <img style="width: 100%;object-fit: " src="http://9206xosk7874.vicp.fun/static/wordcloud.png" alt="">
+            </div>
+            <Top class="border"></Top>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import Map from './components/map.vue';
 import { getWebSocketList } from '@/api/feng';
-let baseUrl = 'ws://localhost:8080';
+import LinksTrend from './components/LinksTrend.vue';
+import SentimentTrend from './components/SentimentTrend.vue';
+import Top from './components/Top.vue';
+
 let webSocketList = ref([] as any);
 const isMapShow = ref(false);
 if (process.env.NODE_ENV === 'production') {
@@ -22,6 +34,7 @@ onMounted(async () => {
         if (res?.success) {
             webSocketList.value = res.data;
             isMapShow.value = true;
+
         }
     }
     catch (e) {
@@ -32,4 +45,11 @@ onMounted(async () => {
 
 
 
-<style scoped></style>
+<style scoped>
+.border {
+    margin-top: 10px;
+    border: 1px solid #eeeeee;
+
+    box-sizing: border-box;
+}
+</style>

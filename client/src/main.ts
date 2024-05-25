@@ -1,4 +1,8 @@
 import { createApp } from 'vue';
 import './style.css';
+import ScrollDirective from './directive/scroll';
 import App from './App.vue';
-createApp(App).mount('#app');
+import '@/assets/reset.css';
+const app = createApp(App);
+ScrollDirective(app);
+app.mount('#app');

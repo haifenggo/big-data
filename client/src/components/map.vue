@@ -1,17 +1,16 @@
 <template>
-    <div id="main" style="width: 800px;height: 600px;"></div>
+    <div id="main" style="width: 600px;height: 400px;"></div>
 </template>
 <script setup lang="ts">
 import * as echarts from 'echarts';
 import chinaMap from '@/assets/china.json';
-import { onMounted, reactive, defineProps, onBeforeUnmount } from 'vue';
+import { onMounted, reactive, defineProps, onBeforeUnmount, ref } from 'vue';
 import { top10 } from '../mock';
 import { startLocationCount } from '@/api/feng';
-interface IProps {
-    webSocketurl: string;
-}
-const props = defineProps<IProps>();
-const { webSocketurl } = props;
+
+let baseUrl = import.meta.env.VITE_WEBSOCKET_URL;
+const webSocketurl = baseUrl + '/websocket/locationCount';
+
 
 const speacialProvinces = ['北京市', '天津市', '重庆市', '上海市', '内蒙古自治区', '广西壮族自治区', '西藏自治区', '宁夏回族自治区', '新疆维吾尔自治区',
     '香港特别行政区', '澳门特别行政区'
@@ -20,7 +19,7 @@ interface LocationCount {
     name: string;
     value: number;
 }
-const locationCount: LocationCount[] = reactive([]);
+const locationCount = ref([] as any);
 const solveProvince = (name: string) => {
     let len = name.length;
     let res: any = null;
@@ -36,16 +35,20 @@ const solveProvince = (name: string) => {
     if (res) return res;
     return name + '省';
 }
-const initCharts = (data: any) => {
+var myChart: any;
+var data: any = {};
+const initCharts = () => {
+    locationCount.value = [];
+    const curDate = new Date();
     for (let key of Object.getOwnPropertyNames(data)) {
-        locationCount.push({
-            name: solveProvince(key),
-            value: (data as any)[key]?.count
-        })
+
+        if (curDate.getTime() - data[key].timestamp < 2500000)
+            locationCount.value.push({
+                name: solveProvince(key),
+                value: + (data as any)[key]?.count
+            })
     }
-    const ele = document.getElementById('main');
-    var myChart = echarts.init(ele);
-    echarts.registerMap('中国', chinaMap as any);
+
     const option = {
         title: {
             text: '热点',
@@ -87,7 +90,7 @@ const initCharts = (data: any) => {
                 label: {
                     show: false
                 },
-                data: locationCount,
+                data: locationCount.value,
 
             }
         ]
@@ -97,14 +100,24 @@ const initCharts = (data: any) => {
 }
 let socket: WebSocket;
 onMounted(async () => {
+    const ele = document.getElementById('main');
+    myChart = echarts.init(ele);
+    echarts.registerMap('中国', chinaMap as any);
+    initCharts();
     const res = await startLocationCount()
     if (res.success) {
+        console.log(webSocketurl);
         socket = new WebSocket(webSocketurl);
         socket.addEventListener('message', function (event) {
-            console.log(event.data);
-            initCharts(event.data);
+
+            data = JSON.parse(event.data);
+            initCharts();
+
         })
+
     }
+
+
 })
 onBeforeUnmount(() => {
     socket.close();

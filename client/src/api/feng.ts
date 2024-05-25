@@ -23,4 +23,9 @@ const startLikesTrend = async () => {
 	return data;
 };
 
-export { getWebSocketList, startLikesTrend, startLocationCount, startSentimentTrend };
+const startVideoTop = async () => {
+	const { data } = await instance.get('/video_top');
+	return data;
+};
+
+export { getWebSocketList, startLikesTrend, startLocationCount, startSentimentTrend, startVideoTop };
