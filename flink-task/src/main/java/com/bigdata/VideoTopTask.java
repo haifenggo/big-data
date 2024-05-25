@@ -1,7 +1,7 @@
-package com.bigdata.bigdata.task;
+package com.bigdata;
 
 import com.alibaba.fastjson.JSON;
-import com.bigdata.bigdata.entity.VideoData;
+import com.bigdata.entity.VideoData;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.functions.KeySelector;

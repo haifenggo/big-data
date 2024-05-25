@@ -41,23 +41,23 @@ def connectRedis():
     # 从配置文件中获取Redis连接参数
     redisHost = config.get('redis', 'host')
     redisPort = config.getint('redis', 'port')
-    # redisPassword = config.get('redis', 'password')
+    redisPassword = config.get('redis', 'password')
     # 连接Redis数据库
-    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
-    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
+    redisClient = redis.StrictRedis(host=redisHost, port=redisPort, password=redisPassword, decode_responses=True)
+    # redisClient = redis.StrictRedis(host=redisHost, port=redisPort, decode_responses=True)
     return redisClient
 
 def Sentiment(all_comment, redisCli):
     # 情感分析
     classified_texts = classify(all_comment)
     classified_emotions = SentimentAnalysis(classified_texts)
-    redisCli.set('sentiment_trend', json.dumps(classified_emotions))
+    redisCli.set('sentiment_trend', str(json.dumps(classified_emotions)))
 
 
 def likesAnalyze(all_data, redisCli):
     rankStats = rankCount(all_data)
     # print(rankStats)
-    redisCli.set('likes_trend', json.dumps(rankStats))
+    redisCli.set('likes_trend', str(json.dumps(rankStats)))
 
 def connect():
     # 读取配置文件
@@ -103,17 +103,21 @@ def LDA(comment_list, redisCli):
                 tdict.update(word)
             new_topic.append(tdict) 
         topics[key] = new_topic
-    redisCli.set('lda_topics', json.dumps(topics))
+    redisCli.set('lda_topics', str(json.dumps(topics)))
 
     counterRet = collections.Counter(all_words) #对分词做词频统计
     wordCloud(counterRet)
 
 def boardAverageTop(all_data, redisCli):
-    print(all_data)
+    # print(all_data)
     top_10_views = calcBoardTop10Views(all_data)
     top_10_comments = calcDanmakuBoard(all_data)
-    redisCli.set('top_10_views', top_10_views)
-    redisCli.set('top_10_comments', top_10_comments)
+    redisCli.set('top_10_views', str(top_10_views))
+    redisCli.set('top_10_comments', str(top_10_comments))
+    # print("---------")
+    # print(str(top_10_views))
+    # print(str(top_10_comments))
+    # print("---------")
 
 def getData():
     db = connect()
@@ -142,8 +146,8 @@ if __name__ == '__main__':
         print("=====================================")
         print("================send=================")
         print("=====================================")
-        send_to_kafka(kafkaProducer, 'board', all_data[:10])
-        send_to_kafka(kafkaProducer, 'comments', all_comment[:10])
+        send_to_kafka(kafkaProducer, 'board', all_data)
+        send_to_kafka(kafkaProducer, 'comments', all_comment)
         # 前十名统计
         boardAverageTop(all_data, redisDB)
         # 情感分析

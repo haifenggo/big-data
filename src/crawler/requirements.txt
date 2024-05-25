@@ -83,7 +83,7 @@ seaborn==0.11.2
 SecretStorage==2.3.1
 simplejson==3.19.2
 six==1.16.0
-sklearn
+sklearn==0.0
 snownlp==0.12.3
 soupsieve==2.3.2.post1
 ssh-import-id==5.7

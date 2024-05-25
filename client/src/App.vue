@@ -1,6 +1,7 @@
 <template>
     <div>
-        <Map v-if="isMapShow" :webSocketurl="baseUrl + webSocketList?.length ? webSocketList[0] : ''"> </Map>
+<!--        <Map v-if="isMapShow" :webSocketurl="baseUrl + webSocketList?.length ? webSocketList[0] : ''"> </Map>-->
+      <Map v-if="isMapShow" webSocketurl="ws:localhost:8080/websocket/locationCount"> </Map>
     </div>
 
 </template>
