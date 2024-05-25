@@ -69,7 +69,7 @@ docker run -itd --name=taskmanager --network flink-network --env FLINK_PROPERTIE
 ##### 打包为JAR提交
 - 修改`flink-task/pom.xml`文件中的`<manifest><mainClass>com.bigdata.LocationCountTask</mainClass></manifest>`配置。
 - 使用Maven工具分别为这两个任务打包，生成JAR文件。
-- 通过Apache Flink的Web UI（访问地址为http://192.168.101.101:8081），手动将JAR包提交到Docker容器中的Flink集群。
+- 通过Apache Flink的Web UI（访问地址为`http://192.168.101.101:8081`），手动将JAR包提交到Docker容器中的Flink集群。
 #### 前端项目启动
 1. **安装依赖**：进入`client`目录，执行`npm install`以安装项目所需的依赖包。
 2. **开发服务器启动**：依赖安装完成后，在项目根目录下运行命令`npm run dev`，以启动Vite开发服务器。
