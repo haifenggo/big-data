@@ -122,6 +122,33 @@ docker run -itd --name=taskmanager --network flink-network --env FLINK_PROPERTIE
 ## 贡献者
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/jiajieZeng">
+                    <img src="https://avatars.githubusercontent.com/u/87409341?v=4" width="100;" alt="jiajieZeng"/>
+                    <br />
+                    <sub><b>Jiajie Zeng</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/haifenggo">
+                    <img src="https://avatars.githubusercontent.com/u/88493045?v=4" width="100;" alt="haifenggo"/>
+                    <br />
+                    <sub><b>haifenggo</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/2057ge">
+                    <img src="https://avatars.githubusercontent.com/u/144788057?v=4" width="100;" alt="2057ge"/>
+                    <br />
+                    <sub><b>2057ge</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: collaborators,contributors -end -->
 
 ## 技术栈
