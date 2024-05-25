@@ -21,7 +21,7 @@ spring:
     host: 192.168.101.101
     port: 6379
     password: redisroot
-    database: 1
+    database: 0
 logging:
   level:
     root: error

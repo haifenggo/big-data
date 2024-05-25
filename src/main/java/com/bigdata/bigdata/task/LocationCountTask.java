@@ -19,6 +19,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -60,7 +62,8 @@ public class LocationCountTask {
                         Map<String, String> mp = new HashMap();
                         mp.put("publishLocation", key);
                         mp.put("count", String.valueOf(distinctBVs.size()));
-                        mp.put("timestamp", String.valueOf(Instant.now().toEpochMilli()));
+                        mp.put("timestamp", String.valueOf(ZonedDateTime.now(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()));
+//                        mp.put("timestamp", String.valueOf(Instant.now().toEpochMilli()));
                         String string = JSON.toJSONString(mp);
                         out.collect(string);
                     }

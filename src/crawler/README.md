@@ -1,4 +1,5 @@
 # 爬虫类使用方法
+* 需要`python3.9`
 * 安装需要的python库`pip install -r requirements.txt`
 * 修改`config.ini`文件里面的kafka和redis配置,mongo不用管
 * 运行`python main.py`
@@ -47,3 +48,51 @@
 redis里面存储了情感趋势。key是`sentiment_trend`, value是`json`，get出来之后转成`json`
 ### 点赞投币趋势
 redis里面存储量点赞投币趋势。key是`likes_trend`, value是`json`get出来之后转成`json`
+### LDA 主题topics
+使用LDA算法为每个分区的弹幕划分了三个主题，每个主题都带有几个关键词。在redis中，key是`lda_topics`，value是`json`。
+如下所示：
+comprehensive是分区名字，里面的数组是每一个元素表示一个主题的关键词集合。第二个是关键词的权重。建议画热力图什么的。
+下面这里表示一个主题，主题里面包含两个关键词。即一个分区会有三个主题，一个主题包含n个关键词。
+```json
+{
+    "决定": "0.001",
+    "吃": "0.002"
+}
+```
+下面是整个数据的格式。
+```json
+{
+    "comprehensive": [
+        {
+            "决定": "0.001",
+            "吃": "0.002"
+        },
+        {
+            "哈哈": "0.3",
+            "嘻嘻": "0.4"
+        }
+    ],
+    "anime": [
+        {
+            "无酸纸": "0.333"
+        },
+        {
+            "变色": "0.777"
+        }
+    ]
+}
+
+```
+
+### 词云图
+生成了一张词云图，放在`/src/main/resources/data`目录下
+
+### 每个分区的前十平均播放量和弹幕数量
+redis的key是`top_10_views`和`top_10_comments`
+数据格式
+```json
+{
+    "comprehensive": 100,
+    "anie": 200,
+}
+```

@@ -203,3 +203,50 @@ ws://localhost:8080/websocket/locationCount
 }
 ```
 
+
+
+
+
+
+
+### 5. 获取视频分区得分top
+
+#### GET `/video_top`
+
+获取分区得分top的视频和地址。
+
+**响应示例:**
+
+- 成功:
+
+  ```json
+  {
+    "success": true,
+    "msg": null,
+    "data": null
+  }
+  ```
+
+- 失败:
+
+  ```json
+  {
+    "success": false,
+    "msg": "任务添加失败",
+    "data": null
+  }
+  ```
+
+#### 数据格式
+
+```json
+{
+    "national_original": "{\"bvid\":\"BV1Ug411F7f8\",\"score\":\"1.67735204E7\",\"title\":\"【黄逗菌】第七十六集  查 寝？ 对 我 没 用！\",\"board\":\"national_original\",\"url\":\"www.bilibili.com/BV1Ug411F7f8\"}",
+    "comprehensive": "{\"bvid\":\"BV1Kt421u7mJ\",\"score\":\"1.31560247E7\",\"title\":\"你把戒指吃下去了啊？...唔？！\",\"board\":\"comprehensive\",\"url\":\"www.bilibili.com/BV1Kt421u7mJ\"}"
+}
+```
+
+
+
+
+

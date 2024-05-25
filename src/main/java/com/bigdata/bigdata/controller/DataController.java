@@ -17,11 +17,14 @@ public class DataController {
     @Autowired
     RedisTemplate redisTemplate;
 
-    @GetMapping("/locationcount")
-    public Result getLocationCount(){
-        Map locationCount = redisTemplate.opsForHash().entries("LocationCount");
-//        String string = JSON.toJSONString(locationCount);
-        return Result.success(locationCount);
+    @GetMapping("/test")
+    public Result getTest() {
+//        Map locationCount = redisTemplate.opsForHash().entries("LocationCount");
+        Object sentiment_trend = redisTemplate.opsForValue().get("sentiment_trend");
+
+        return Result.success(JSON.parseObject((String) sentiment_trend));
+
+//        return Result.success(sentiment_trend);
     }
 
 }
