@@ -93,10 +93,10 @@ def getOthers(all_data, all_comment):
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=181&type=all',
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=origin',
         'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=rookie']
-    # filenames = ['national_original', 'anime', 'music', 'dancing', 'games', 'knowledge',
-    #             'technology', 'sports', 'fashion', 'fun', 'movies', 'origin', 'rookie']
+    filenames = ['national_original', 'anime', 'music', 'dancing', 'games', 'knowledge',
+                'technology', 'sports', 'fashion', 'fun', 'movies', 'origin', 'rookie']
 
-    filenames = ['national_original']
+    # filenames = ['national_original']
     global proxy, cookie
     for j in range(len(filenames)):
         print("working in ", filenames[j])

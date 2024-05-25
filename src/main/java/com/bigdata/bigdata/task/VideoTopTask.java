@@ -52,7 +52,7 @@ public class VideoTopTask {
                     Map<String, String> map = new HashMap<>();
                     map.put("board", videoData.getBoard());
                     map.put("bvid", videoData.getBvid());
-                    map.put("score", calculateScore(videoData).toString());
+                    map.put("score", String.valueOf(calculateScore(videoData)));
                     map.put("title", videoData.getTitle());
                     map.put("url", "www.bilibili.com/" + videoData.getBvid());
                     return JSON.toJSONString(map);

@@ -62,7 +62,7 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = "video-top-topic", groupId = "video-top-consumer")
     public void consume_video_top(String message) {
-        VideoData videoData = JSON.parseObject(message, VideoData.class);
-        redisTemplate.opsForHash().put("video_top", videoData.getBoard(), message);
+        Map videoData = JSON.parseObject(message, Map.class);
+        redisTemplate.opsForHash().put("video_top", videoData.get("board"), videoData);
     }
 }
