@@ -10,9 +10,6 @@ def connectKafka():
 
         # 获取生产者配置
         producer_conf = dict(config['producer'])
-
-
-
         # 创建生产者实例
         producer = Producer(producer_conf)
         return producer
@@ -27,7 +24,7 @@ def delivery_report(err, msg):
     else:
         print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
-def send_to_kafka(producer, topic, data):
+def send_to_kafka(data, topic, producer):
     try:
         for item in data:
             # 将字典转换为 JSON 格式的字符串
