@@ -142,12 +142,10 @@ if __name__ == '__main__':
         all_data, all_comment = [], []
         Get_data(all_data=all_data, all_comment=all_comment)
         time.sleep(2)
-        getOthers(all_data = all_data, all_comment = all_comment)
+        # getOthers(all_data = all_data, all_comment = all_comment)
         print("=====================================")
         print("================send=================")
         print("=====================================")
-        send_to_kafka(kafkaProducer, 'board', all_data)
-        send_to_kafka(kafkaProducer, 'comments', all_comment)
         # 前十名统计
         boardAverageTop(all_data, redisDB)
         # 情感分析
@@ -157,4 +155,5 @@ if __name__ == '__main__':
         # LDA主题分析
         LDA(all_comment, redisDB)
         print("================end==================")
+        break
         time.sleep(10)

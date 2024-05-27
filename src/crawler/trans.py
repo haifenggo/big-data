@@ -12,7 +12,7 @@ stoplist=[i.strip() for i in codecs.open('./files/stop_words.txt', 'r', 'utf-8')
 
 def cht_to_chs(line):
     line = Converter('zh-hans').convert(line)
-    line.encode('utf-8')
+    line.encode('utf-8').decode('utf-8')
     return line
 
 def str_convertU(content):

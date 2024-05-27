@@ -15,8 +15,11 @@ from sklearn import datasets
 from sklearn.linear_model import LinearRegression
 import pandas as pd
 import re
+from kafkaController import *
 
 from kafkaController import *
+
+kafka_controller = connectKafka()
 
 proxy = {'http':'122.225.30.179:20235'}
 cookie = {'domain': '/',
@@ -70,10 +73,13 @@ def Parse(text, all_data, all_comment):
         rank = rank + 1
         cid_list.append(i['cid'])
         all_data.append(temp)
+        send_to_kafka([temp], 'board', kafka_controller)
     comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
     for i in range(len(comment_list)):
-        all_comment.append({"content": comment_list[i], "videoTime": comment_video_time_list[i],
-                                "commentRealTime": comment_real_time_list[i], "board": "comprehensive"})
+        tmp = {"content": comment_list[i], "videoTime": comment_video_time_list[i],
+                                "commentRealTime": comment_real_time_list[i], "board": "comprehensive"}
+        all_comment.append(tmp)
+        send_to_kafka([tmp], 'comment', kafka_controller)
     return True
 
 def getOthers(all_data, all_comment):
@@ -118,11 +124,14 @@ def getOthers(all_data, all_comment):
             rank += 1
             cid_list.append(i['cid'])
             all_data.append(temp)
+            send_to_kafka([temp], 'board', kafka_controller)
         comment_list, comment_video_time_list, comment_real_time_list = iterCrawlComment(cid_list)
         comments_dicts = []
         for i in range(len(comment_list)):
-            comments_dicts.append({"content": comment_list[i], "videotTime": comment_video_time_list[i],
-                                    "commentRealTime": comment_real_time_list[i], "board": filenames[j]})
+            tmp = {"content": comment_list[i], "videotTime": comment_video_time_list[i],
+                                    "commentRealTime": comment_real_time_list[i], "board": filenames[j]}
+            comments_dicts.append(tmp)
+            send_to_kafka([tmp], 'comment', kafka_controller)
         all_comment.extend(comments_dicts)
         res.close()
         # time.sleep(1)
