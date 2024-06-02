@@ -2,11 +2,12 @@
     <div class="wrapper-video">
         <template v-for="item in data">
             <el-row class="video-row" :gutter="20">
-                <el-col :span="4">
+                <el-col :span="6">
                     <div>{{ translateToChinese(item.board) }}</div>
                 </el-col>
-                <el-col :span="20">
-                    <el-link :href=item.url target="_blank" :underline="false">{{ item.title }}</el-link>
+                <el-col :span="18">
+                    <el-link :href="'https:' + item.url" target="_blank" :underline="false">{{ item.title }}
+                    </el-link>
 
                 </el-col>
 
@@ -21,7 +22,7 @@ import * as echarts from 'echarts';
 import chinaMap from '@/assets/china.json';
 import { onMounted, reactive, defineProps, onBeforeUnmount, ref } from 'vue';
 import { startVideoTop } from '@/api/feng';
-
+import { translateToChinese } from '@/util.ts';
 let baseUrl = import.meta.env.VITE_WEBSOCKET_URL;
 const webSocketurl = baseUrl + '/websocket/video_top';
 
@@ -58,28 +59,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     socket.close();
 })
-// 创建一个映射对象，将英文字段映射到中文字段  
-const translationMap: any = {
-    "comprehensive": "综合热榜",
-    "national_original": "国创相关",
-    "anime": "动漫",
-    "music": "音乐",
-    "dancing": "舞蹈",
-    "games": "游戏",
-    "knowledge": "知识",
-    "technology": "科技",
-    "sports": "运动",
-    "fashion": "时尚",
-    "fun": "娱乐",
-    "movies": "影视",
-    "origin": "原创",
-    "rookie": "新人"
-};
 
-// 定义一个函数来转换英文字段到中文字段  
-function translateToChinese(englishTerm: string) {
-    return translationMap[englishTerm] || englishTerm;
-}
+
 
 
 </script>
@@ -88,11 +69,11 @@ function translateToChinese(englishTerm: string) {
     max-height: 500px;
     display: flex;
     flex-direction: column;
-    width: 30vw;
+    width: 100%;
     margin: 0;
     padding: 10px;
     box-sizing: border-box;
-
+    color: red;
 }
 
 .video-row {

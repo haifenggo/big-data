@@ -395,3 +395,13 @@ html,
 .vjs-audio-button{
     display: none !important;
 }
+body{
+
+    background: #081325 url(./images/interact.png)  no-repeat;
+    background-size:cover;
+}
+@font-face
+{
+    font-family: myFirstFont;
+    src: url('./font/Fette-Engschrift.ttf');
+}
