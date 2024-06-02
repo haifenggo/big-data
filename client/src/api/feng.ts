@@ -28,4 +28,20 @@ const startVideoTop = async () => {
 	return data;
 };
 
-export { getWebSocketList, startLikesTrend, startLocationCount, startSentimentTrend, startVideoTop };
+const startTop10 = async () => {
+	const { data } = await instance.get('/top_10');
+	return data;
+};
+const startLDA = async () => {
+	const { data } = await instance.get('/lda_topics');
+	return data;
+};
+export {
+	getWebSocketList,
+	startLikesTrend,
+	startLocationCount,
+	startSentimentTrend,
+	startVideoTop,
+	startTop10,
+	startLDA,
+};

@@ -1,5 +1,5 @@
 <template>
-    <div id="main" style="width: 600px;height: 400px;"></div>
+    <div id="main" style="width: 100%;height: 100%;"></div>
 </template>
 <script setup lang="ts">
 import * as echarts from 'echarts';
@@ -38,15 +38,23 @@ const solveProvince = (name: string) => {
 var myChart: any;
 var data: any = {};
 const initCharts = () => {
+    let min = 100;
+    let max = 0;
     locationCount.value = [];
     const curDate = new Date();
     for (let key of Object.getOwnPropertyNames(data)) {
 
-        if (curDate.getTime() - data[key].timestamp < 2500000)
+        if (curDate.getTime() - data[key].timestamp < 60000) {
             locationCount.value.push({
                 name: solveProvince(key),
                 value: + (data as any)[key]?.count
+
             })
+            min = Math.min(min, +(data as any)[key]?.count)
+            max = Math.max(max, +(data as any)[key]?.count)
+        }
+
+
     }
 
     const option = {
@@ -61,15 +69,15 @@ const initCharts = () => {
             formatter: '{b}<br/>{c}'
         },
         visualMap: {
-            min: 0,
-            max: 10,
-            text: ['High', 'Low'],
+            min: min,
+            max: max,
+            text: ['高', '低'],
             realtime: false,
             calculable: true,
             inRange: {
                 color: ['lightskyblue', 'yellow', 'orangered']
             },
-            top: '50%',
+            top: "50%"
         },
 
         // visualMap: {
@@ -106,7 +114,7 @@ onMounted(async () => {
     initCharts();
     const res = await startLocationCount()
     if (res.success) {
-        console.log(webSocketurl);
+
         socket = new WebSocket(webSocketurl);
         socket.addEventListener('message', function (event) {
 

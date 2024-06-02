@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!-- <div>
         <h1 style="margin:0 auto ;font-size: 20px;margin-top: 10px" align="center">B站热榜分析大数据项目</h1>
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;padding: 20px;justify-content: space-around;">
             <Map class="border"> </Map>
@@ -11,7 +11,8 @@
             </div>
             <Top class="border"></Top>
         </div>
-    </div>
+    </div> -->
+    <Template></Template>
 </template>
 
 <script setup lang="ts">
@@ -21,7 +22,7 @@ import { getWebSocketList } from '@/api/feng';
 import LinksTrend from './components/LinksTrend.vue';
 import SentimentTrend from './components/SentimentTrend.vue';
 import Top from './components/Top.vue';
-
+import Template from './components/template.vue';
 let webSocketList = ref([] as any);
 const isMapShow = ref(false);
 if (process.env.NODE_ENV === 'production') {
@@ -45,7 +46,7 @@ onMounted(async () => {
 
 
 
-<style scoped>
+<style>
 .border {
     margin-top: 10px;
     border: 1px solid #eeeeee;
