@@ -38,6 +38,7 @@ public class ScheduledController {
         webSocketList.add("/websocket/likes_trend");
         webSocketList.add("/websocket/video_top");
         webSocketList.add("/websocket/top_10");
+        webSocketList.add("/websocket/lda_topics");
         return Result.success(webSocketList);
     }
 
@@ -46,7 +47,7 @@ public class ScheduledController {
         boolean added = WebSocketServer.addSchedule("locationCount", () -> {
             Map locationCount = redisTemplate.opsForHash().entries("LocationCount");
             WebSocketServer.sendMessage("locationCount", JSON.toJSONString(locationCount));
-        }, new CronTrigger("0/5 * * * *  ?"));
+        }, new CronTrigger("0/3 * * * *  ?"));
         if (!added) {
             Result.fail("任务添加失败");
         }
@@ -95,9 +96,9 @@ public class ScheduledController {
         boolean added = WebSocketServer.addSchedule("top_10", () -> {
             String top_10_views = (String) redisTemplate.opsForValue().get("top_10_views");
             String top_10_comments = (String) redisTemplate.opsForValue().get("top_10_comments");
-            Map<String, String> map = new HashMap<>();
-            map.put("top_10_views", top_10_views);
-            map.put("top_10_comments", top_10_comments);
+            Map<String, Object> map = new HashMap<>();
+            map.put("top_10_views", JSON.parse(top_10_views));
+            map.put("top_10_comments", JSON.parse(top_10_comments));
             WebSocketServer.sendMessage("top_10", JSON.toJSONString(map));
         }, new CronTrigger("0/10 * * * *  ?"));
         if (!added) {

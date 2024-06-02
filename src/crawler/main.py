@@ -103,7 +103,7 @@ def LDA(comment_list, redisCli):
                 tdict.update(word)
             new_topic.append(tdict) 
         topics[key] = new_topic
-    redisCli.set('lda_topics', str(json.dumps(topics)))
+    redisCli.set('lda_topics', str(json.dumps(topics, ensure_ascii=False)))
 
     counterRet = collections.Counter(all_words) #对分词做词频统计
     wordCloud(counterRet)
@@ -142,10 +142,10 @@ if __name__ == '__main__':
         all_data, all_comment = [], []
         Get_data(all_data=all_data, all_comment=all_comment)
         time.sleep(2)
-        # getOthers(all_data = all_data, all_comment = all_comment)
-        print("=====================================")
-        print("================send=================")
-        print("=====================================")
+        getOthers(all_data = all_data, all_comment = all_comment)
+        print("========================================")
+        print("=============== analyze ================")
+        print("========================================")
         # 前十名统计
         boardAverageTop(all_data, redisDB)
         # 情感分析
@@ -155,5 +155,5 @@ if __name__ == '__main__':
         # LDA主题分析
         LDA(all_comment, redisDB)
         print("================end==================")
-        break
+        # break
         time.sleep(10)

@@ -24,7 +24,7 @@ spring:
     database: 0
 logging:
   level:
-    root: error
+    root: info # error
     org.springframework.web: info
     org.apache.kafka: ERROR
 

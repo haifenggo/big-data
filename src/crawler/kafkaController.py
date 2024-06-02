@@ -32,6 +32,6 @@ def send_to_kafka(data, topic, producer):
             # 发送消息
             producer.produce(topic, value=message)
         producer.flush()
-        print("Messages sent to Kafka successfully")
+        # print("Messages sent to Kafka successfully")
     except Exception as e:
         print(f"Failed to send message to Kafka: {e}")
