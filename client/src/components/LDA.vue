@@ -24,7 +24,7 @@ const webSocketurl = baseUrl + '/websocket/lda_topics';
 
 const value = ref([] as any)
 const handleChange = (value: any) => {
-    console.log(value)
+
     curData = data[value[0]];
 
     let i = 0;
@@ -47,7 +47,7 @@ const initCharts = (chart: any, curData: any) => {
         obj.value = curData[key];
         pieData.push(obj);
     }
-    console.log(pieData);
+
     const option = {
         title: {
 
@@ -90,12 +90,12 @@ onMounted(async () => {
     myChart.push(echarts.init(ele3));
     const res = await startLDA()
     if (res.success) {
-        console.log(webSocketurl);
+
         socket = new WebSocket(webSocketurl);
         socket.addEventListener('message', function (event) {
-            console.log('event', event);
+
             data = JSON.parse(event.data);
-            console.log(data);
+
             if (!isOption) {
                 for (let key of Object.getOwnPropertyNames(data)) {
                     let obj = {} as any;

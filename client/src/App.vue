@@ -35,7 +35,7 @@ onMounted(async () => {
         if (res?.success) {
             webSocketList.value = res.data;
             isMapShow.value = true;
-            console.log(webSocketList.value);
+
         }
     }
     catch (e) {

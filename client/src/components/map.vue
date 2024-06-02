@@ -39,12 +39,12 @@ var myChart: any;
 var data: any = {};
 const initCharts = () => {
     let min = 100;
-    let max = -1;
+    let max = 0;
     locationCount.value = [];
     const curDate = new Date();
     for (let key of Object.getOwnPropertyNames(data)) {
 
-        if (curDate.getTime() - data[key].timestamp < 25000000) {
+        if (curDate.getTime() - data[key].timestamp < 60000) {
             locationCount.value.push({
                 name: solveProvince(key),
                 value: + (data as any)[key]?.count
@@ -114,7 +114,7 @@ onMounted(async () => {
     initCharts();
     const res = await startLocationCount()
     if (res.success) {
-        console.log(webSocketurl);
+
         socket = new WebSocket(webSocketurl);
         socket.addEventListener('message', function (event) {
 
