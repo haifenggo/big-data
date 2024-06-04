@@ -11,6 +11,7 @@ from trans import *
 from LDA import *
 import collections
 import webbrowser
+import threading
 
 def connectMongo():
     # 读取配置文件
@@ -132,6 +133,11 @@ def getData():
             break
     return d
 
+def run_in_thread(func, *args):
+    thread = thread.Thread(target=func, args=args)
+    thread.start()
+    return thread
+
 if __name__ == '__main__':
     redisDB = connectRedis()
     kafkaProducer = connectKafka()
@@ -147,13 +153,16 @@ if __name__ == '__main__':
         print("=============== analyze ================")
         print("========================================")
         # 前十名统计
-        boardAverageTop(all_data, redisDB)
-        # 情感分析
-        Sentiment(all_comment, redisDB)
-        # 点赞等趋势
-        likesAnalyze(all_data, redisDB)
-        # LDA主题分析
-        LDA(all_comment, redisDB)
+        thread_top_10 = run_in_thread(boardAverageTop, all_data, redisDB)
+        thread_sentiment = run_in_thread(Sentiment, all_comment, redisDB)
+        thread_lda = run_in_thread(LDA, all_comment, redisDB)
+        # boardAverageTop(all_data, redisDB)
+        # # 情感分析
+        # Sentiment(all_comment, redisDB)
+        # # 点赞等趋势
+        # likesAnalyze(all_data, redisDB)
+        # # LDA主题分析
+        # LDA(all_comment, redisDB)
         print("================end==================")
         # break
         time.sleep(10)
