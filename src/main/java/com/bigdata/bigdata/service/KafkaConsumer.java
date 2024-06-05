@@ -53,7 +53,7 @@ public class KafkaConsumer {
 //        System.out.println("Received board: " + videoData);
     }
 
-    @KafkaListener(topics = "comments", groupId = "python-consumer")
+    @KafkaListener(topics = "comment", groupId = "python-consumer")
     public void consume_comments(String message) {
         mongoTemplate.insert(JSON.parseObject(message, Comment.class));
 //        System.out.println("Received message: " + comment);

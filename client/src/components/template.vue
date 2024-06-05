@@ -114,7 +114,7 @@
             </div>
             <div class="bottom">
                 <div class="count-topic e1">
-                    <div class="com-count-title">每个分区的前十平均播放量和弹幕数量</div>
+                    <div class="com-count-title">LDA主题</div>
                     <div class="com-screen-content">
                         <div id="main6" style="width:100%;height:300px;">
                             <LDA></LDA>

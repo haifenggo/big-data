@@ -46,27 +46,47 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.bigdata.LocationCountTask</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
+                        <id>make-assembly-location</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.bigdata.LocationCountTask</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>flink-task-location</finalName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>make-assembly-videotop</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.bigdata.VideoTopTask</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>flink-task-video</finalName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
 
         </plugins>
+
     </build>
 </project>

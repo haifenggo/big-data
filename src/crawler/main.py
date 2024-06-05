@@ -134,7 +134,7 @@ def getData():
     return d
 
 def run_in_thread(func, *args):
-    thread = thread.Thread(target=func, args=args)
+    thread = threading.Thread(target=func, args=args)
     thread.start()
     return thread
 
@@ -156,6 +156,7 @@ if __name__ == '__main__':
         thread_top_10 = run_in_thread(boardAverageTop, all_data, redisDB)
         thread_sentiment = run_in_thread(Sentiment, all_comment, redisDB)
         thread_lda = run_in_thread(LDA, all_comment, redisDB)
+        thread_likesAnalyze = run_in_thread(likesAnalyze, all_data, redisDB)
         # boardAverageTop(all_data, redisDB)
         # # 情感分析
         # Sentiment(all_comment, redisDB)
