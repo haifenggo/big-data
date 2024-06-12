@@ -57,7 +57,91 @@ docker run -itd --name=jobmanager --publish 8081:8081 --network flink-network --
 ```bash
 docker run -itd --name=taskmanager --network flink-network --env FLINK_PROPERTIES="jobmanager.rpc.address: jobmanager" flink:1.13.6-scala_2.12-java8 taskmanager
 ```
+#### docker compose文件
+
+```yaml
+version: '3.8'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - /etc/localtime:/etc/localtime
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: 192.168.101.101:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.101.101:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
+      KAFKA_ZOOKEEPER_SYNC_TIMEOUT_MS: 10000
+    depends_on:
+      - zookeeper
+    volumes:
+      - /etc/localtime:/etc/localtime
+
+  redis:
+    image: redis:6.0.5
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass redisroot
+    volumes:
+      - /data/redis/conf/redis.conf:/etc/redis/redis.conf
+      - /data/redis/data:/var/lib/redis
+      - /data/redis/logs:/logs
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongoroot
+    volumes:
+      - /usr/local/mongodb/data/db:/data/db
+
+  jobmanager:
+    image: flink:1.13.6-scala_2.12-java8
+    container_name: jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    networks:
+      - flink-network
+
+  taskmanager:
+    image: flink:1.13.6-scala_2.12-java8
+    container_name: taskmanager
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    networks:
+      - flink-network
+
+networks:
+  flink-network:
+    driver: bridge
+```
+
+
+
 ### 应用程序启动指南
+
 #### 爬虫程序使用步骤
 1. **环境要求**：确保Python版本为3.9或以上。
 2. **安装依赖**：通过命令`pip install -r requirements.txt`安装必需的Python库。
@@ -120,6 +204,14 @@ docker run -itd --name=taskmanager --network flink-network --env FLINK_PROPERTIE
 5. 数据交互：前端可能还提供用户交互功能，如允许用户选择查看特定类型的数据、筛选数据、调整显示选项等。
 
 前端的主要功能是与后端服务器进行交互，获取实时数据更新，并将这些数据以用户友好的方式展示给用户。同时，前端还需要处理WebSocket连接的建立和维护，以及数据的实时订阅和接收。
+
+## 功能展示
+
+![image-20240605211557359](README.assets/image-20240605211557359.png)
+
+![image-20240605211430279](README.assets/image-20240605211430279.png)
+
+![image-20240605211413359](README.assets/image-20240605211413359.png)
 
 
 
